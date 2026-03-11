@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>汉字拆解 · 根·中文</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1A1208;
+  --paper: #F7F2E8;
+  --red: #B83025;
+  --red-soft: rgba(184,48,37,0.08);
+  --gold: #C4922A;
+  --gold-soft: rgba(196,146,42,0.1);
+  --muted: #8A7060;
+  --border: rgba(26,18,8,0.1);
+}
+
+- { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+background: var(–paper);
+color: var(–ink);
+font-family: ‘Crimson Pro’, ‘Noto Serif SC’, Georgia, serif;
+min-height: 100vh;
+overflow-x: hidden;
+}
+
+/* Texture overlay */
+body::before {
+content: ‘’;
+position: fixed; inset: 0;
+background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 256 256’ xmlns=‘http://www.w3.org/2000/svg’%3E%3Cfilter id=‘noise’%3E%3CfeTurbulence type=‘fractalNoise’ baseFrequency=‘0.9’ numOctaves=‘4’ stitchTiles=‘stitch’/%3E%3C/filter%3E%3Crect width=‘100%25’ height=‘100%25’ filter=‘url(%23noise)’ opacity=‘0.03’/%3E%3C/svg%3E”);
+pointer-events: none; z-index: 0;
+}
+
+.page { position: relative; z-index: 1; max-width: 600px; margin: 0 auto; padding: 40px 20px 100px; }
+
+/* Header */
+.site-header { text-align: center; margin-bottom: 48px; }
+.brand { font-family: ‘Noto Serif SC’, serif; font-size: 13px; letter-spacing: 6px; color: var(–red); margin-bottom: 6px; }
+.brand-sub { font-size: 11px; letter-spacing: 4px; color: var(–muted); font-family: ‘Crimson Pro’, serif; font-style: italic; }
+
+/* Input section */
+.input-section {
+background: white;
+border-radius: 24px;
+padding: 28px 26px 22px;
+box-shadow: 0 2px 0 rgba(26,18,8,0.06), 0 8px 32px rgba(26,18,8,0.06);
+border: 1px solid var(–border);
+margin-bottom: 20px;
+}
+
+.input-row { display: flex; gap: 12px; margin-bottom: 20px; }
+
+#charInput {
+width: 80px; height: 80px;
+text-align: center;
+font-size: 46px;
+font-family: ‘Noto Serif SC’, serif;
+font-weight: 600;
+border: 2px solid rgba(196,146,42,0.3);
+border-radius: 16px;
+background: #FDFAF4;
+color: var(–ink);
+outline: none;
+flex-shrink: 0;
+transition: border-color 0.2s;
+caret-color: var(–red);
+}
+#charInput:focus { border-color: var(–red); }
+
+#genBtn {
+flex: 1;
+background: var(–red);
+color: white;
+border: none;
+border-radius: 16px;
+font-family: ‘Noto Serif SC’, serif;
+font-size: 17px;
+letter-spacing: 2px;
+cursor: pointer;
+box-shadow: 0 4px 0 rgba(139,29,22,0.4), 0 8px 24px rgba(184,48,37,0.2);
+transition: all 0.15s;
+position: relative;
+top: 0;
+}
+#genBtn:hover { top: -1px; box-shadow: 0 5px 0 rgba(139,29,22,0.4), 0 10px 28px rgba(184,48,37,0.25); }
+#genBtn:active { top: 3px; box-shadow: 0 1px 0 rgba(139,29,22,0.4), 0 4px 12px rgba(184,48,37,0.15); }
+#genBtn:disabled { background: #C5B8A8; box-shadow: 0 2px 0 rgba(0,0,0,0.1); cursor: not-allowed; top: 0; }
+
+.quick-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.quick-label { font-size: 10px; letter-spacing: 3px; color: var(–muted); font-family: ‘Crimson Pro’, serif; white-space: nowrap; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip {
+width: 36px; height: 36px;
+border-radius: 10px;
+border: 1.5px solid rgba(196,146,42,0.25);
+background: #FDFAF4;
+font-family: ‘Noto Serif SC’, serif;
+font-size: 18px;
+color: var(–ink);
+cursor: pointer;
+display: flex; align-items: center; justify-content: center;
+transition: all 0.15s;
+}
+.chip:hover { border-color: var(–red); background: var(–red-soft); color: var(–red); transform: translateY(-1px); }
+
+/* Output */
+#output { display: flex; flex-direction: column; gap: 16px; }
+
+/* Empty state */
+.empty-state {
+text-align: center;
+padding: 60px 20px;
+color: var(–muted);
+}
+.empty-char {
+font-family: ‘Noto Serif SC’, serif;
+font-size: 88px;
+font-weight: 900;
+color: rgba(184,48,37,0.07);
+line-height: 1;
+margin-bottom: 16px;
+display: block;
+}
+.empty-hint { font-size: 14px; line-height: 2; }
+.empty-hint em { color: var(–gold); font-style: normal; }
+
+/* Loading */
+.loading-state { text-align: center; padding: 48px 20px; }
+.loading-char {
+font-family: ‘Noto Serif SC’, serif;
+font-size: 72px;
+font-weight: 700;
+color: var(–ink);
+animation: breathe 1.5s ease-in-out infinite;
+display: block;
+margin-bottom: 16px;
+}
+@keyframes breathe { 0%,100%{opacity:0.2;transform:scale(0.95)} 50%{opacity:0.8;transform:scale(1.02)} }
+.loading-label { font-size: 13px; color: var(–muted); letter-spacing: 2px; font-family: ‘Crimson Pro’, serif; font-style: italic; }
+
+/* Error */
+.error-state {
+background: #FEF2F0;
+border: 1px solid rgba(184,48,37,0.2);
+border-radius: 16px;
+padding: 16px 20px;
+color: var(–red);
+font-size: 14px;
+font-family: ‘Crimson Pro’, serif;
+}
+
+/* Cards */
+.card {
+background: white;
+border-radius: 20px;
+padding: 24px;
+border: 1px solid var(–border);
+box-shadow: 0 2px 0 rgba(26,18,8,0.04), 0 6px 24px rgba(26,18,8,0.05);
+}
+
+.card-tag {
+font-size: 9px;
+letter-spacing: 4px;
+text-transform: uppercase;
+color: var(–red);
+font-family: ‘Crimson Pro’, serif;
+margin-bottom: 12px;
+display: block;
+}
+
+/* Hero card */
+.hero-card { text-align: center; }
+
+.anim-stage {
+min-height: 160px;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+margin-bottom: 20px;
+position: relative;
+}
+
+.parts-display {
+display: flex;
+align-items: flex-start;
+justify-content: center;
+gap: 32px;
+transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.parts-display.squeeze { gap: 6px; }
+.parts-display.vanish { opacity: 0; transform: scale(0.75) translateY(-8px); }
+
+.part-unit { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.part-glyph {
+width: 64px; height: 64px;
+border-radius: 14px;
+background: var(–red-soft);
+border: 1.5px solid rgba(184,48,37,0.18);
+display: flex; align-items: center; justify-content: center;
+font-family: ‘Noto Serif SC’, serif;
+font-size: 32px;
+color: var(–red);
+}
+.part-desc { font-size: 10px; color: var(–muted); max-width: 64px; text-align: center; font-family: ‘Crimson Pro’, serif; font-style: italic; }
+
+.merge-arrow {
+font-size: 16px; color: var(–gold);
+opacity: 0; margin: 10px 0;
+transition: opacity 0.4s ease;
+font-family: ‘Crimson Pro’, serif;
+}
+.merge-arrow.show { opacity: 1; }
+
+.merged-glyph {
+font-family: ‘Noto Serif SC’, serif;
+font-size: 96px;
+font-weight: 700;
+color: var(–ink);
+line-height: 1;
+opacity: 0;
+transform: scale(0.4) rotate(-3deg);
+transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.merged-glyph.appear { opacity: 1; transform: scale(1) rotate(0deg); }
+
+.hero-meta { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+.pinyin-badge {
+padding: 5px 18px;
+background: #FDFAF4;
+border: 1px solid rgba(196,146,42,0.3);
+border-radius: 20px;
+font-size: 16px;
+color: var(–ink);
+letter-spacing: 2px;
+font-family: ‘Crimson Pro’, serif;
+}
+.level-badge {
+padding: 5px 14px;
+border-radius: 20px;
+font-size: 11px;
+letter-spacing: 1px;
+font-family: ‘Crimson Pro’, serif;
+}
+.meaning-line {
+font-size: 20px;
+font-weight: 600;
+color: var(–ink);
+margin-top: 10px;
+font-family: ‘Noto Serif SC’, serif;
+}
+.parts-summary {
+display: flex; justify-content: center; flex-wrap: wrap; gap: 6px;
+margin-top: 14px;
+}
+.part-pill {
+display: inline-flex; align-items: center; gap: 6px;
+padding: 6px 12px;
+background: var(–red-soft);
+border-radius: 10px;
+font-size: 12px;
+color: #5A3020;
+font-family: ‘Crimson Pro’, serif;
+}
+.part-pill-char { font-family: ‘Noto Serif SC’, serif; font-size: 17px; }
+
+/* Story card */
+.story-body { font-size: 15px; line-height: 1.9; color: #2A1A0E; }
+.scene-strip {
+margin-top: 16px;
+padding: 14px 16px;
+background: var(–gold-soft);
+border-radius: 12px;
+border-left: 3px solid var(–gold);
+}
+.scene-tag { font-size: 9px; letter-spacing: 3px; color: var(–gold); font-family: ‘Crimson Pro’, serif; text-transform: uppercase; margin-bottom: 4px; }
+.scene-body { font-size: 14px; color: #5A4020; font-style: italic; line-height: 1.75; }
+
+/* Two-col card */
+.two-col { display: flex; gap: 20px; }
+.col { flex: 1; min-width: 0; }
+.col-tag { font-size: 9px; letter-spacing: 3px; color: var(–red); font-family: ‘Crimson Pro’, serif; text-transform: uppercase; margin-bottom: 10px; }
+.ext-line { font-size: 13px; line-height: 1.9; color: #3A2010; font-family: ‘Crimson Pro’, serif; }
+.cy-char { font-family: ‘Noto Serif SC’, serif; font-size: 20px; color: var(–ink); margin-bottom: 6px; }
+.cy-body { font-size: 12px; color: var(–muted); line-height: 1.7; font-family: ‘Crimson Pro’, serif; font-style: italic; }
+
+/* Divider */
+.col-divider { width: 1px; background: var(–border); flex-shrink: 0; }
+
+/* Mom card */
+.mom-card {
+border-color: rgba(196,146,42,0.25);
+overflow: hidden;
+}
+.mom-toggle {
+width: 100%; background: none; border: none;
+padding: 20px 24px;
+display: flex; align-items: center; justify-content: space-between;
+cursor: pointer; text-align: left;
+}
+.mom-toggle-left { display: flex; flex-direction: column; gap: 3px; }
+.mom-title { font-size: 15px; font-family: ‘Noto Serif SC’, serif; color: var(–ink); font-weight: 600; }
+.mom-sub { font-size: 11px; color: var(–muted); font-family: ‘Crimson Pro’, serif; font-style: italic; }
+.mom-chevron { font-size: 18px; color: var(–gold); transition: transform 0.3s; }
+.mom-chevron.open { transform: rotate(180deg); }
+
+.mom-body { display: none; padding: 0 24px 24px; border-top: 1px solid rgba(196,146,42,0.15); padding-top: 20px; }
+.mom-sublabel { font-size: 9px; letter-spacing: 3px; color: var(–gold); font-family: ‘Crimson Pro’, serif; text-transform: uppercase; margin-bottom: 16px; }
+
+.q-item { display: flex; gap: 12px; margin-bottom: 14px; }
+.q-num {
+width: 24px; height: 24px; border-radius: 50%;
+background: var(–gold);
+color: white; font-size: 11px;
+font-family: ‘Crimson Pro’, serif;
+display: flex; align-items: center; justify-content: center;
+flex-shrink: 0; margin-top: 2px;
+}
+.q-text { font-size: 14px; line-height: 1.8; color: #2A1A0E; font-family: ‘Crimson Pro’, serif; }
+
+.tip-strip {
+margin-top: 14px;
+background: var(–red-soft);
+border-radius: 10px;
+padding: 12px 14px;
+}
+.tip-label { font-size: 9px; letter-spacing: 2px; color: var(–red); font-family: ‘Crimson Pro’, serif; text-transform: uppercase; margin-bottom: 4px; }
+.tip-text { font-size: 12px; color: #4A2010; line-height: 1.7; font-family: ‘Crimson Pro’, serif; }
+
+/* History strip */
+.history-bar {
+display: flex; gap: 8px; align-items: center;
+padding: 14px 18px;
+background: white;
+border-radius: 14px;
+border: 1px solid var(–border);
+flex-wrap: wrap;
+}
+.history-label { font-size: 10px; letter-spacing: 2px; color: var(–muted); font-family: ‘Crimson Pro’, serif; white-space: nowrap; }
+.history-chip {
+padding: 4px 12px;
+background: #FDFAF4;
+border: 1px solid var(–border);
+border-radius: 8px;
+font-family: ‘Noto Serif SC’, serif;
+font-size: 16px;
+color: var(–ink);
+cursor: pointer;
+transition: all 0.15s;
+}
+.history-chip:hover { border-color: var(–red); color: var(–red); background: var(–red-soft); }
+
+/* Footer nav */
+.footer-nav { text-align: center; margin-top: 32px; }
+.footer-nav a { font-size: 12px; color: var(–muted); font-family: ‘Crimson Pro’, serif; font-style: italic; text-decoration: none; letter-spacing: 1px; }
+.footer-nav a:hover { color: var(–red); }
+</style>
+
+</head>
+<body>
+<div class="page">
+
+  <header class="site-header">
+    <div class="brand">根 · 中 文</div>
+    <div class="brand-sub">Gen Chinese · 汉字拆解生成器</div>
+  </header>
+
+  <div class="input-section">
+    <div class="input-row">
+      <input id="charInput" type="text" placeholder="字" maxlength="1"
+        oninput="this.value=this.value.slice(-1)"
+        onkeydown="if(event.key==='Enter')doGenerate()">
+      <button id="genBtn" onclick="doGenerate()">🔍 拆解</button>
+    </div>
+    <div class="quick-row">
+      <span class="quick-label">体验</span>
+      <div class="chips">
+        <div class="chip" onclick="doQuick('明')">明</div>
+        <div class="chip" onclick="doQuick('休')">休</div>
+        <div class="chip" onclick="doQuick('森')">森</div>
+        <div class="chip" onclick="doQuick('闻')">闻</div>
+        <div class="chip" onclick="doQuick('家')">家</div>
+        <div class="chip" onclick="doQuick('笑')">笑</div>
+        <div class="chip" onclick="doQuick('飞')">飞</div>
+        <div class="chip" onclick="doQuick('鱼')">鱼</div>
+        <div class="chip" onclick="doQuick('山')">山</div>
+        <div class="chip" onclick="doQuick('水')">水</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- History -->
+
+  <div class="history-bar" id="historyBar" style="display:none;">
+    <span class="history-label">已学</span>
+    <div id="historyChips"></div>
+  </div>
+
+  <div id="output">
+    <div class="empty-state">
+      <span class="empty-char">字</span>
+      <div class="empty-hint">
+        输入任意汉字，生成<em>拆解故事</em><br>
+        自然拼读 · 文化意象 · <em>清迈场景</em> · 妈妈台词
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-nav"><a href="index.html">← 返回根·中文主页</a></div>
+
+</div>
+
+<script>
+const LEVELS = {
+  R1:{color:"#922B21",bg:"#FFF0EE",label:"入门"},
+  R2:{color:"#BA4A00",bg:"#FFF6EE",label:"基础"},
+  R3:{color:"#1E8449",bg:"#EDFAF1",label:"进阶"},
+  R4:{color:"#2874A2",bg:"#EBF5FB",label:"提升"},
+  R5:{color:"#6C3483",bg:"#F4ECF7",label:"高阶"},
+};
+
+// History (sessionStorage so it resets per session)
+let history = [];
+
+function saveHistory(ch) {
+  if (!history.includes(ch)) {
+    history.unshift(ch);
+    if (history.length > 8) history.pop();
+  }
+  renderHistory();
+}
+
+function renderHistory() {
+  if (!history.length) return;
+  const bar = document.getElementById('historyBar');
+  const chips = document.getElementById('historyChips');
+  bar.style.display = 'flex';
+  chips.innerHTML = history.map(ch =>
+    `<div class="history-chip" onclick="doQuick('${ch}')">${ch}</div>`
+  ).join('');
+}
+
+function doQuick(ch) {
+  document.getElementById('charInput').value = ch;
+  doGenerate();
+}
+
+async function doGenerate() {
+  const ch = document.getElementById('charInput').value.trim();
+  if (!ch) return;
+
+  const btn = document.getElementById('genBtn');
+  const out = document.getElementById('output');
+
+  btn.disabled = true;
+  btn.textContent = '生成中…';
+
+  out.innerHTML = `
+    <div class="loading-state">
+      <span class="loading-char">${ch}</span>
+      <div class="loading-label">正在拆解这个字…</div>
+    </div>`;
+
+  try {
+    const res = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ char: ch })
+    });
+
+    const d = await res.json();
+    if (d.error) throw new Error(d.error);
+
+    saveHistory(ch);
+    renderCards(d, ch);
+
+  } catch(e) {
+    out.innerHTML = `<div class="error-state">⚠️ ${e.message}</div>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '🔍 拆解';
+  }
+}
+
+function renderCards(d, ch) {
+  const lv = d.level || 'R1';
+  const cfg = LEVELS[lv] || LEVELS.R1;
+  const parts = d.parts || [];
+  const exts = Array.isArray(d.extension) ? d.extension : [d.extension];
+  const qs = d.mom_questions || [];
+
+  const partsBoxes = parts.map(p => `
+    <div class="part-unit">
+      <div class="part-glyph">${p.char}</div>
+      <div class="part-desc">${p.image}</div>
+    </div>`).join('');
+
+  const partsPills = parts.map(p => `
+    <div class="part-pill">
+      <span class="part-pill-char">${p.char}</span>
+      <span>${p.name} · ${p.image}</span>
+    </div>`).join('');
+
+  const extLines = exts.filter(Boolean).map(e =>
+    `<div class="ext-line">· ${e}</div>`).join('');
+
+  const qItems = qs.map((q,i) => `
+    <div class="q-item">
+      <div class="q-num">${i+1}</div>
+      <div class="q-text">${q}</div>
+    </div>`).join('');
+
+  document.getElementById('output').innerHTML = `
+
+    <!-- 主卡 -->
+    <div class="card hero-card">
+      <div class="anim-stage">
+        <div class="parts-display" id="partsRow">${partsBoxes}</div>
+        <div class="merge-arrow" id="mergeArrow">↓ 合而为一</div>
+        <div class="merged-glyph" id="mergedGlyph">${ch}</div>
+      </div>
+      <div class="hero-meta">
+        <span class="pinyin-badge">${d.pinyin}</span>
+        <span class="level-badge" style="background:${cfg.bg};color:${cfg.color};">${lv} · ${cfg.label}</span>
+      </div>
+      <div class="meaning-line">${d.meaning}</div>
+      <div class="parts-summary">${partsPills}</div>
+    </div>
+
+    <!-- 故事卡 -->
+    <div class="card">
+      <span class="card-tag">📖 文化故事</span>
+      <div class="story-body">${d.story}</div>
+      <div class="scene-strip">
+        <div class="scene-tag">🌴 清迈场景</div>
+        <div class="scene-body">${d.scene}</div>
+      </div>
+    </div>
+
+    <!-- 词汇 + 成语 -->
+    <div class="card">
+      <div class="two-col">
+        <div class="col">
+          <div class="col-tag">🔤 延伸词汇</div>
+          ${extLines}
+        </div>
+        <div class="col-divider"></div>
+        <div class="col">
+          <div class="col-tag">🌟 成语</div>
+          <div class="cy-char">${d.chengyu}</div>
+          <div class="cy-body">${d.cy_story}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 妈妈台词 -->
+    <div class="card mom-card" id="momCard">
+      <button class="mom-toggle" onclick="toggleMom()">
+        <div class="mom-toggle-left">
+          <div class="mom-title">👩 妈妈台词</div>
+          <div class="mom-sub" id="momSub">点击展开 · 3个引导问题</div>
+        </div>
+        <span class="mom-chevron" id="momChevron">⌄</span>
+      </button>
+      <div class="mom-body" id="momBody">
+        <div class="mom-sublabel">自然聊天，不是考试</div>
+        ${qItems}
+        <div class="tip-strip">
+          <div class="tip-label">💡 小贴士</div>
+          <div class="tip-text">问完后，让孩子用「${ch}」造一个句子。不需要正确，有趣就好。</div>
+        </div>
+      </div>
+    </div>
+
+  `;
+
+  // 动画序列
+  requestAnimationFrame(() => {
+    const row = document.getElementById('partsRow');
+    const arrow = document.getElementById('mergeArrow');
+    const merged = document.getElementById('mergedGlyph');
+    if (!row) return;
+
+    setTimeout(() => { row.classList.add('squeeze'); }, 200);
+    setTimeout(() => {
+      row.classList.add('vanish');
+      arrow.classList.add('show');
+    }, 900);
+    setTimeout(() => { merged.classList.add('appear'); }, 1200);
+  });
+}
+
+function toggleMom() {
+  const body = document.getElementById('momBody');
+  const chevron = document.getElementById('momChevron');
+  const sub = document.getElementById('momSub');
+  const card = document.getElementById('momCard');
+  const open = body.style.display !== 'block';
+  body.style.display = open ? 'block' : 'none';
+  chevron.classList.toggle('open', open);
+  sub.textContent = open ? '点击收起' : '点击展开 · 3个引导问题';
+  card.style.background = open ? '#FFFDF8' : 'white';
+}
+</script>
+
+</body>
+</html>
