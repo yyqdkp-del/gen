@@ -3,612 +3,504 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>汉字拆解 · 根·中文</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>根·中文 · 汉字解码器</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
 <style>
 :root {
   --ink: #1A1208;
-  --paper: #F7F2E8;
-  --red: #B83025;
-  --red-soft: rgba(184,48,37,0.08);
-  --gold: #C4922A;
-  --gold-soft: rgba(196,146,42,0.1);
-  --muted: #8A7060;
-  --border: rgba(26,18,8,0.1);
+  --paper: #F5EFE3;
+  --red: #B5341A;
+  --red-light: #F0E0DB;
+  --gold: #B8860B;
+  --gold-light: #F5EDD0;
+  --green: #2D6A4F;
+  --green-light: #D4EAD8;
+  --purple: #6C3483;
+  --purple-light: #E8D5F0;
+  --muted: #7A6A5A;
+  --border: rgba(26,18,8,0.12);
 }
-
-- { margin:0; padding:0; box-sizing:border-box; }
-
+* { margin:0; padding:0; box-sizing:border-box; }
 body {
-background: var(–paper);
-color: var(–ink);
-font-family: ‘Crimson Pro’, ‘Noto Serif SC’, Georgia, serif;
-min-height: 100vh;
-overflow-x: hidden;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Noto Serif SC', serif;
+  min-height: 100vh;
 }
 
-/* Texture overlay */
-body::before {
-content: ‘’;
-position: fixed; inset: 0;
-background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 256 256’ xmlns=‘http://www.w3.org/2000/svg’%3E%3Cfilter id=‘noise’%3E%3CfeTurbulence type=‘fractalNoise’ baseFrequency=‘0.9’ numOctaves=‘4’ stitchTiles=‘stitch’/%3E%3C/filter%3E%3Crect width=‘100%25’ height=‘100%25’ filter=‘url(%23noise)’ opacity=‘0.03’/%3E%3C/svg%3E”);
-pointer-events: none; z-index: 0;
-}
-
-.page { position: relative; z-index: 1; max-width: 600px; margin: 0 auto; padding: 40px 20px 100px; }
-
-/* Header */
-.site-header { text-align: center; margin-bottom: 48px; }
-.brand { font-family: ‘Noto Serif SC’, serif; font-size: 13px; letter-spacing: 6px; color: var(–red); margin-bottom: 6px; }
-.brand-sub { font-size: 11px; letter-spacing: 4px; color: var(–muted); font-family: ‘Crimson Pro’, serif; font-style: italic; }
-
-/* Input section */
-.input-section {
-background: white;
-border-radius: 24px;
-padding: 28px 26px 22px;
-box-shadow: 0 2px 0 rgba(26,18,8,0.06), 0 8px 32px rgba(26,18,8,0.06);
-border: 1px solid var(–border);
-margin-bottom: 20px;
-}
-
-.input-row { display: flex; gap: 12px; margin-bottom: 20px; }
-
-#charInput {
-width: 80px; height: 80px;
+/* ── HEADER ── */
+.header {
 text-align: center;
-font-size: 46px;
+padding: 40px 20px 0;
+position: relative;
+}
+.header-back {
+position: absolute; left: 20px; top: 44px;
+font-size: 13px; color: var(–muted);
+text-decoration: none; display: flex; align-items: center; gap: 4px;
+}
+.header-back:hover { color: var(–red); }
+.header h1 {
+font-family: ‘Ma Shan Zheng’, serif;
+font-size: 32px; color: var(–red);
+letter-spacing: 4px; margin-bottom: 6px;
+}
+.header p { font-size: 13px; color: var(–muted); letter-spacing: 1px; }
+
+/* ── TABS ── */
+.tabs {
+display: flex; gap: 0;
+max-width: 680px; margin: 32px auto 0;
+border-bottom: 2px solid var(–border);
+padding: 0 20px;
+}
+.tab {
+flex: 1; padding: 12px 8px;
+font-size: 14px; font-weight: 600;
+color: var(–muted); cursor: pointer;
+border-bottom: 2px solid transparent;
+margin-bottom: -2px;
+transition: all 0.2s;
+text-align: center;
 font-family: ‘Noto Serif SC’, serif;
-font-weight: 600;
-border: 2px solid rgba(196,146,42,0.3);
-border-radius: 16px;
-background: #FDFAF4;
-color: var(–ink);
-outline: none;
-flex-shrink: 0;
+display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.tab .tab-icon { font-size: 20px; }
+.tab .tab-label { font-size: 13px; }
+.tab .tab-en { font-size: 10px; color: var(–muted); letter-spacing: 1px; opacity: 0.7; }
+.tab:hover { color: var(–ink); }
+.tab.active { color: var(–red); border-bottom-color: var(–red); }
+
+/* ── PANELS ── */
+.panel { display: none; max-width: 680px; margin: 0 auto; padding: 32px 20px 60px; }
+.panel.active { display: block; }
+
+/* ── INPUT AREA ── */
+.input-section { margin-bottom: 24px; }
+.input-label { font-size: 11px; letter-spacing: 2px; color: var(–muted); text-transform: uppercase; margin-bottom: 10px; display: block; }
+.input-row { display: flex; gap: 10px; }
+.char-input {
+font-size: 36px; width: 72px; height: 64px; text-align: center;
+border: 2px solid var(–border); border-radius: 8px;
+font-family: ‘Ma Shan Zheng’, serif; color: var(–ink);
+background: #fff; outline: none;
 transition: border-color 0.2s;
-caret-color: var(–red);
+box-shadow: 0 2px 8px rgba(26,18,8,0.06);
 }
-#charInput:focus { border-color: var(–red); }
-
-#genBtn {
-flex: 1;
-background: var(–red);
-color: white;
-border: none;
-border-radius: 16px;
+.char-input:focus { border-color: var(–red); }
+.text-input {
+flex: 1; padding: 14px 16px;
+border: 2px solid var(–border); border-radius: 8px;
+font-family: ‘Noto Serif SC’, serif; font-size: 15px;
+color: var(–ink); background: #fff; outline: none;
+transition: border-color 0.2s; resize: none;
+box-shadow: 0 2px 8px rgba(26,18,8,0.06);
+line-height: 1.6;
+}
+.text-input:focus { border-color: var(–red); }
+.keyword-input {
+width: 100%; padding: 12px 16px; margin-top: 10px;
+border: 1.5px solid var(–border); border-radius: 8px;
+font-family: ‘Noto Serif SC’, serif; font-size: 14px;
+color: var(–ink); background: #fff; outline: none;
+transition: border-color 0.2s;
+}
+.keyword-input:focus { border-color: var(–green); }
+.go-btn {
+height: 64px; padding: 0 28px; border-radius: 8px;
+background: linear-gradient(180deg, #C84030 0%, #A93226 100%);
+color: #fff; border: none; cursor: pointer;
+font-size: 15px; font-weight: 600;
 font-family: ‘Noto Serif SC’, serif;
-font-size: 17px;
-letter-spacing: 2px;
-cursor: pointer;
-box-shadow: 0 4px 0 rgba(139,29,22,0.4), 0 8px 24px rgba(184,48,37,0.2);
-transition: all 0.15s;
-position: relative;
-top: 0;
+box-shadow: 0 4px 14px rgba(192,57,43,0.3);
+transition: all 0.2s; white-space: nowrap;
 }
-#genBtn:hover { top: -1px; box-shadow: 0 5px 0 rgba(139,29,22,0.4), 0 10px 28px rgba(184,48,37,0.25); }
-#genBtn:active { top: 3px; box-shadow: 0 1px 0 rgba(139,29,22,0.4), 0 4px 12px rgba(184,48,37,0.15); }
-#genBtn:disabled { background: #C5B8A8; box-shadow: 0 2px 0 rgba(0,0,0,0.1); cursor: not-allowed; top: 0; }
+.go-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(192,57,43,0.35); }
+.go-btn:disabled { background: #C8B8A8; box-shadow: none; cursor: not-allowed; transform: none; }
+.go-btn-wide {
+width: 100%; height: 52px; border-radius: 8px; margin-top: 12px;
+background: linear-gradient(180deg, #C84030 0%, #A93226 100%);
+color: #fff; border: none; cursor: pointer;
+font-size: 15px; font-weight: 600;
+font-family: ‘Noto Serif SC’, serif;
+box-shadow: 0 4px 14px rgba(192,57,43,0.25);
+transition: all 0.2s;
+}
+.go-btn-wide:hover { transform: translateY(-1px); }
+.go-btn-wide:disabled { background: #C8B8A8; box-shadow: none; cursor: not-allowed; transform: none; }
 
-.quick-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.quick-label { font-size: 10px; letter-spacing: 3px; color: var(–muted); font-family: ‘Crimson Pro’, serif; white-space: nowrap; }
-.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+/* ── CHIPS ── */
+.chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; align-items: center; }
+.chip-label { font-size: 11px; color: var(–muted); }
 .chip {
-width: 36px; height: 36px;
-border-radius: 10px;
-border: 1.5px solid rgba(196,146,42,0.25);
-background: #FDFAF4;
-font-family: ‘Noto Serif SC’, serif;
-font-size: 18px;
-color: var(–ink);
-cursor: pointer;
-display: flex; align-items: center; justify-content: center;
-transition: all 0.15s;
-}
-.chip:hover { border-color: var(–red); background: var(–red-soft); color: var(–red); transform: translateY(-1px); }
-
-/* Output */
-#output { display: flex; flex-direction: column; gap: 16px; }
-
-/* Empty state */
-.empty-state {
-text-align: center;
-padding: 60px 20px;
-color: var(–muted);
-}
-.empty-char {
-font-family: ‘Noto Serif SC’, serif;
-font-size: 88px;
-font-weight: 900;
-color: rgba(184,48,37,0.07);
-line-height: 1;
-margin-bottom: 16px;
-display: block;
-}
-.empty-hint { font-size: 14px; line-height: 2; }
-.empty-hint em { color: var(–gold); font-style: normal; }
-
-/* Loading */
-.loading-state { text-align: center; padding: 48px 20px; }
-.loading-char {
-font-family: ‘Noto Serif SC’, serif;
-font-size: 72px;
-font-weight: 700;
-color: var(–ink);
-animation: breathe 1.5s ease-in-out infinite;
-display: block;
-margin-bottom: 16px;
-}
-@keyframes breathe { 0%,100%{opacity:0.2;transform:scale(0.95)} 50%{opacity:0.8;transform:scale(1.02)} }
-.loading-label { font-size: 13px; color: var(–muted); letter-spacing: 2px; font-family: ‘Crimson Pro’, serif; font-style: italic; }
-
-/* Error */
-.error-state {
-background: #FEF2F0;
-border: 1px solid rgba(184,48,37,0.2);
-border-radius: 16px;
-padding: 16px 20px;
-color: var(–red);
-font-size: 14px;
-font-family: ‘Crimson Pro’, serif;
-}
-
-/* Cards */
-.card {
-background: white;
-border-radius: 20px;
-padding: 24px;
+padding: 4px 12px; border-radius: 20px; background: #fff;
 border: 1px solid var(–border);
-box-shadow: 0 2px 0 rgba(26,18,8,0.04), 0 6px 24px rgba(26,18,8,0.05);
+font-family: ‘Noto Serif SC’, serif; font-size: 15px;
+cursor: pointer; color: var(–ink); transition: all 0.15s;
+}
+.chip:hover { border-color: var(–red); color: var(–red); background: var(–red-light); }
+.chip.cy { font-size: 13px; }
+
+/* ── RESULT CARDS ── */
+.result { display: none; margin-top: 8px; }
+.result.show { display: block; }
+.loading {
+text-align: center; padding: 40px;
+color: var(–muted); font-size: 14px;
+}
+.loading-dots::after {
+content: ‘’; animation: dots 1.2s infinite;
+}
+@keyframes dots {
+0%,20% { content: ‘。’; }
+40%,60% { content: ‘。。’; }
+80%,100% { content: ‘。。。’; }
 }
 
-.card-tag {
-font-size: 9px;
-letter-spacing: 4px;
-text-transform: uppercase;
-color: var(–red);
-font-family: ‘Crimson Pro’, serif;
-margin-bottom: 12px;
-display: block;
+/* ── HANZI RESULT ── */
+.hz-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(26,18,8,0.08); border: 1px solid var(–border); }
+.hz-hero {
+background: linear-gradient(135deg, #F8EEE8, #F0E4D0);
+padding: 28px; display: flex; gap: 20px; align-items: center;
+border-bottom: 1px solid var(–border);
 }
+.hz-char { font-family: ‘Ma Shan Zheng’, serif; font-size: 80px; color: var(–red); line-height: 1; min-width: 90px; text-align: center; }
+.hz-meta-title { font-size: 22px; color: var(–muted); font-family: ‘Lora’, serif; margin-bottom: 4px; }
+.hz-meta-meaning { font-size: 16px; color: var(–ink); margin-bottom: 10px; }
+.hz-level { display: inline-block; padding: 3px 12px; border-radius: 12px; font-size: 11px; font-weight: 700; background: var(–gold-light); color: var(–gold); }
+.hz-row { padding: 18px 24px; border-bottom: 1px solid var(–border); }
+.hz-row:last-child { border-bottom: none; }
+.hz-row-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(–muted); margin-bottom: 8px; }
+.hz-parts { display: flex; gap: 8px; flex-wrap: wrap; }
+.hz-part { background: var(–red-light); color: var(–red); padding: 4px 14px; border-radius: 4px; font-family: ‘Ma Shan Zheng’, serif; font-size: 20px; }
+.hz-story { font-size: 15px; color: var(–ink); line-height: 1.9; }
+.hz-scene { font-size: 14px; color: #3A5A3A; line-height: 1.8; background: var(–green-light); padding: 12px 16px; border-radius: 6px; border-left: 3px solid var(–green); }
+.hz-mom { font-size: 14px; color: var(–ink); line-height: 1.8; }
+.hz-mom-q { padding: 6px 0; display: flex; gap: 8px; }
+.hz-mom-q::before { content: ‘💬’; flex-shrink: 0; }
+.hz-ext { display: flex; flex-wrap: wrap; gap: 8px; }
+.hz-ext-item { background: #F0F4F8; padding: 6px 14px; border-radius: 4px; font-size: 13px; color: var(–blue, #1A4A7A); }
+.hz-cy { background: var(–gold-light); border-radius: 8px; padding: 16px 20px; }
+.hz-cy-word { font-family: ‘Ma Shan Zheng’, serif; font-size: 28px; color: var(–gold); margin-bottom: 6px; }
+.hz-cy-story { font-size: 13px; color: #6A5A2A; line-height: 1.7; }
 
-/* Hero card */
-.hero-card { text-align: center; }
+/* ── CHENGYU RESULT ── */
+.cy-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(26,18,8,0.08); border: 1px solid var(–border); }
+.cy-hero {
+background: linear-gradient(135deg, #F5EDD0, #EDE0B8);
+padding: 28px; border-bottom: 1px solid var(–border);
+}
+.cy-original { font-size: 13px; color: var(–muted); margin-bottom: 4px; }
+.cy-issue { font-size: 13px; color: var(–red); background: var(–red-light); padding: 4px 10px; border-radius: 4px; display: inline-block; margin-bottom: 16px; }
+.cy-word { font-family: ‘Ma Shan Zheng’, serif; font-size: 52px; color: var(–gold); line-height: 1; margin-bottom: 4px; }
+.cy-pinyin { font-size: 14px; color: var(–muted); }
+.cy-row { padding: 18px 24px; border-bottom: 1px solid var(–border); }
+.cy-row:last-child { border-bottom: none; }
+.cy-row-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(–muted); margin-bottom: 8px; }
+.cy-meaning { font-size: 15px; color: var(–ink); line-height: 1.8; }
+.cy-scene { font-size: 14px; color: #3A5A3A; line-height: 1.8; background: var(–green-light); padding: 12px 16px; border-radius: 6px; border-left: 3px solid var(–green); }
+.cy-mom-script { font-size: 14px; color: var(–ink); line-height: 1.9; background: #F8F4EE; padding: 16px; border-radius: 8px; border-left: 3px solid var(–gold); font-style: italic; }
+.cy-similar { display: flex; gap: 8px; flex-wrap: wrap; }
+.cy-similar-item { background: var(–gold-light); color: var(–gold); padding: 4px 14px; border-radius: 4px; font-family: ‘Ma Shan Zheng’, serif; font-size: 18px; }
 
-.anim-stage {
-min-height: 160px;
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
-margin-bottom: 20px;
-position: relative;
+/* ── WRITING RESULT ── */
+.wr-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(26,18,8,0.08); border: 1px solid var(–border); }
+.wr-hero {
+background: linear-gradient(135deg, #E8D5F0, #D8C0E8);
+padding: 24px; border-bottom: 1px solid var(–border);
 }
+.wr-hero-label { font-size: 11px; letter-spacing: 2px; color: var(–purple); text-transform: uppercase; margin-bottom: 8px; }
+.wr-original-text { font-size: 14px; color: #5A3A5A; line-height: 1.7; font-style: italic; }
+.wr-row { padding: 18px 24px; border-bottom: 1px solid var(–border); }
+.wr-row:last-child { border-bottom: none; }
+.wr-row-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(–muted); margin-bottom: 8px; }
+.wr-draft { font-size: 16px; color: var(–ink); line-height: 2; font-family: ‘Ma Shan Zheng’, serif; background: #F8F4EE; padding: 16px; border-radius: 8px; }
+.wr-blanks { font-size: 16px; color: var(–ink); line-height: 2; background: var(–purple-light); padding: 16px; border-radius: 8px; }
+.wr-blank { display: inline-block; width: 40px; border-bottom: 2px solid var(–purple); margin: 0 2px; text-align: center; color: var(–purple); font-weight: 700; }
+.wr-mom-script { font-size: 14px; color: var(–ink); line-height: 1.9; background: #F8F4EE; padding: 16px; border-radius: 8px; border-left: 3px solid var(–purple); font-style: italic; }
+.wr-keywords { display: flex; gap: 8px; flex-wrap: wrap; }
+.wr-keyword { background: var(–purple-light); color: var(–purple); padding: 4px 12px; border-radius: 4px; font-family: ‘Ma Shan Zheng’, serif; font-size: 18px; }
+.wr-tips { font-size: 13px; color: var(–muted); line-height: 1.8; background: #F5F5F5; padding: 12px 16px; border-radius: 6px; }
 
-.parts-display {
-display: flex;
-align-items: flex-start;
-justify-content: center;
-gap: 32px;
-transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.parts-display.squeeze { gap: 6px; }
-.parts-display.vanish { opacity: 0; transform: scale(0.75) translateY(-8px); }
-
-.part-unit { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-.part-glyph {
-width: 64px; height: 64px;
-border-radius: 14px;
-background: var(–red-soft);
-border: 1.5px solid rgba(184,48,37,0.18);
-display: flex; align-items: center; justify-content: center;
-font-family: ‘Noto Serif SC’, serif;
-font-size: 32px;
-color: var(–red);
-}
-.part-desc { font-size: 10px; color: var(–muted); max-width: 64px; text-align: center; font-family: ‘Crimson Pro’, serif; font-style: italic; }
-
-.merge-arrow {
-font-size: 16px; color: var(–gold);
-opacity: 0; margin: 10px 0;
-transition: opacity 0.4s ease;
-font-family: ‘Crimson Pro’, serif;
-}
-.merge-arrow.show { opacity: 1; }
-
-.merged-glyph {
-font-family: ‘Noto Serif SC’, serif;
-font-size: 96px;
-font-weight: 700;
-color: var(–ink);
-line-height: 1;
-opacity: 0;
-transform: scale(0.4) rotate(-3deg);
-transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.merged-glyph.appear { opacity: 1; transform: scale(1) rotate(0deg); }
-
-.hero-meta { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
-.pinyin-badge {
-padding: 5px 18px;
-background: #FDFAF4;
-border: 1px solid rgba(196,146,42,0.3);
-border-radius: 20px;
-font-size: 16px;
-color: var(–ink);
-letter-spacing: 2px;
-font-family: ‘Crimson Pro’, serif;
-}
-.level-badge {
-padding: 5px 14px;
-border-radius: 20px;
-font-size: 11px;
-letter-spacing: 1px;
-font-family: ‘Crimson Pro’, serif;
-}
-.meaning-line {
-font-size: 20px;
-font-weight: 600;
-color: var(–ink);
-margin-top: 10px;
-font-family: ‘Noto Serif SC’, serif;
-}
-.parts-summary {
-display: flex; justify-content: center; flex-wrap: wrap; gap: 6px;
-margin-top: 14px;
-}
-.part-pill {
-display: inline-flex; align-items: center; gap: 6px;
-padding: 6px 12px;
-background: var(–red-soft);
-border-radius: 10px;
-font-size: 12px;
-color: #5A3020;
-font-family: ‘Crimson Pro’, serif;
-}
-.part-pill-char { font-family: ‘Noto Serif SC’, serif; font-size: 17px; }
-
-/* Story card */
-.story-body { font-size: 15px; line-height: 1.9; color: #2A1A0E; }
-.scene-strip {
-margin-top: 16px;
-padding: 14px 16px;
-background: var(–gold-soft);
-border-radius: 12px;
-border-left: 3px solid var(–gold);
-}
-.scene-tag { font-size: 9px; letter-spacing: 3px; color: var(–gold); font-family: ‘Crimson Pro’, serif; text-transform: uppercase; margin-bottom: 4px; }
-.scene-body { font-size: 14px; color: #5A4020; font-style: italic; line-height: 1.75; }
-
-/* Two-col card */
-.two-col { display: flex; gap: 20px; }
-.col { flex: 1; min-width: 0; }
-.col-tag { font-size: 9px; letter-spacing: 3px; color: var(–red); font-family: ‘Crimson Pro’, serif; text-transform: uppercase; margin-bottom: 10px; }
-.ext-line { font-size: 13px; line-height: 1.9; color: #3A2010; font-family: ‘Crimson Pro’, serif; }
-.cy-char { font-family: ‘Noto Serif SC’, serif; font-size: 20px; color: var(–ink); margin-bottom: 6px; }
-.cy-body { font-size: 12px; color: var(–muted); line-height: 1.7; font-family: ‘Crimson Pro’, serif; font-style: italic; }
-
-/* Divider */
-.col-divider { width: 1px; background: var(–border); flex-shrink: 0; }
-
-/* Mom card */
-.mom-card {
-border-color: rgba(196,146,42,0.25);
-overflow: hidden;
-}
-.mom-toggle {
-width: 100%; background: none; border: none;
-padding: 20px 24px;
-display: flex; align-items: center; justify-content: space-between;
-cursor: pointer; text-align: left;
-}
-.mom-toggle-left { display: flex; flex-direction: column; gap: 3px; }
-.mom-title { font-size: 15px; font-family: ‘Noto Serif SC’, serif; color: var(–ink); font-weight: 600; }
-.mom-sub { font-size: 11px; color: var(–muted); font-family: ‘Crimson Pro’, serif; font-style: italic; }
-.mom-chevron { font-size: 18px; color: var(–gold); transition: transform 0.3s; }
-.mom-chevron.open { transform: rotate(180deg); }
-
-.mom-body { display: none; padding: 0 24px 24px; border-top: 1px solid rgba(196,146,42,0.15); padding-top: 20px; }
-.mom-sublabel { font-size: 9px; letter-spacing: 3px; color: var(–gold); font-family: ‘Crimson Pro’, serif; text-transform: uppercase; margin-bottom: 16px; }
-
-.q-item { display: flex; gap: 12px; margin-bottom: 14px; }
-.q-num {
-width: 24px; height: 24px; border-radius: 50%;
-background: var(–gold);
-color: white; font-size: 11px;
-font-family: ‘Crimson Pro’, serif;
-display: flex; align-items: center; justify-content: center;
-flex-shrink: 0; margin-top: 2px;
-}
-.q-text { font-size: 14px; line-height: 1.8; color: #2A1A0E; font-family: ‘Crimson Pro’, serif; }
-
-.tip-strip {
-margin-top: 14px;
-background: var(–red-soft);
-border-radius: 10px;
-padding: 12px 14px;
-}
-.tip-label { font-size: 9px; letter-spacing: 2px; color: var(–red); font-family: ‘Crimson Pro’, serif; text-transform: uppercase; margin-bottom: 4px; }
-.tip-text { font-size: 12px; color: #4A2010; line-height: 1.7; font-family: ‘Crimson Pro’, serif; }
-
-/* History strip */
-.history-bar {
-display: flex; gap: 8px; align-items: center;
-padding: 14px 18px;
-background: white;
-border-radius: 14px;
-border: 1px solid var(–border);
-flex-wrap: wrap;
-}
-.history-label { font-size: 10px; letter-spacing: 2px; color: var(–muted); font-family: ‘Crimson Pro’, serif; white-space: nowrap; }
-.history-chip {
-padding: 4px 12px;
-background: #FDFAF4;
-border: 1px solid var(–border);
-border-radius: 8px;
-font-family: ‘Noto Serif SC’, serif;
-font-size: 16px;
-color: var(–ink);
-cursor: pointer;
-transition: all 0.15s;
-}
-.history-chip:hover { border-color: var(–red); color: var(–red); background: var(–red-soft); }
-
-/* Footer nav */
-.footer-nav { text-align: center; margin-top: 32px; }
-.footer-nav a { font-size: 12px; color: var(–muted); font-family: ‘Crimson Pro’, serif; font-style: italic; text-decoration: none; letter-spacing: 1px; }
-.footer-nav a:hover { color: var(–red); }
+.error-box { background: #FEF0EE; border: 1px solid #F5B7B1; border-radius: 8px; padding: 16px; color: var(–red); font-size: 14px; margin-top: 16px; }
 </style>
 
 </head>
 <body>
-<div class="page">
 
-  <header class="site-header">
-    <div class="brand">根 · 中 文</div>
-    <div class="brand-sub">Gen Chinese · 汉字拆解生成器</div>
-  </header>
+<div class="header">
+  <a href="https://yyqdkp-del.github.io/Genchinese" class="header-back">← 返回根·中文主页</a>
+  <h1>根·中文解码器</h1>
+  <p>汉字拆解 · 成语解读 · 文字化过渡</p>
+</div>
 
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('hanzi')">
+    <span class="tab-icon">🧩</span>
+    <span class="tab-label">汉字拆解</span>
+    <span class="tab-en">Decoder</span>
+  </div>
+  <div class="tab" onclick="switchTab('chengyu')">
+    <span class="tab-icon">🌟</span>
+    <span class="tab-label">成语解读</span>
+    <span class="tab-en">Idioms</span>
+  </div>
+  <div class="tab" onclick="switchTab('writing')">
+    <span class="tab-icon">✍️</span>
+    <span class="tab-label">文字化过渡</span>
+    <span class="tab-en">Writing</span>
+  </div>
+</div>
+
+<!-- 汉字拆解 -->
+
+<div class="panel active" id="panel-hanzi">
   <div class="input-section">
+    <span class="input-label">输入一个汉字</span>
     <div class="input-row">
-      <input id="charInput" type="text" placeholder="字" maxlength="1"
-        oninput="this.value=this.value.slice(-1)"
-        onkeydown="if(event.key==='Enter')doGenerate()">
-      <button id="genBtn" onclick="doGenerate()">🔍 拆解</button>
+      <input class="char-input" id="hanziInput" type="text" maxlength="1" placeholder="字">
+      <button class="go-btn" id="hanziBtn" onclick="runHanzi()">🔍 拆解</button>
     </div>
-    <div class="quick-row">
-      <span class="quick-label">体验</span>
-      <div class="chips">
-        <div class="chip" onclick="doQuick('明')">明</div>
-        <div class="chip" onclick="doQuick('休')">休</div>
-        <div class="chip" onclick="doQuick('森')">森</div>
-        <div class="chip" onclick="doQuick('闻')">闻</div>
-        <div class="chip" onclick="doQuick('家')">家</div>
-        <div class="chip" onclick="doQuick('笑')">笑</div>
-        <div class="chip" onclick="doQuick('飞')">飞</div>
-        <div class="chip" onclick="doQuick('鱼')">鱼</div>
-        <div class="chip" onclick="doQuick('山')">山</div>
-        <div class="chip" onclick="doQuick('水')">水</div>
-      </div>
+    <div class="chips">
+      <span class="chip-label">体验：</span>
+      <span class="chip" onclick="setHanzi('明')">明</span>
+      <span class="chip" onclick="setHanzi('休')">休</span>
+      <span class="chip" onclick="setHanzi('森')">森</span>
+      <span class="chip" onclick="setHanzi('闻')">闻</span>
+      <span class="chip" onclick="setHanzi('家')">家</span>
+      <span class="chip" onclick="setHanzi('笑')">笑</span>
+      <span class="chip" onclick="setHanzi('飞')">飞</span>
+      <span class="chip" onclick="setHanzi('鱼')">鱼</span>
     </div>
   </div>
+  <div class="result" id="hanziResult"></div>
+</div>
 
-  <!-- History -->
+<!-- 成语解读 -->
 
-  <div class="history-bar" id="historyBar" style="display:none;">
-    <span class="history-label">已学</span>
-    <div id="historyChips"></div>
-  </div>
-
-  <div id="output">
-    <div class="empty-state">
-      <span class="empty-char">字</span>
-      <div class="empty-hint">
-        输入任意汉字，生成<em>拆解故事</em><br>
-        自然拼读 · 文化意象 · <em>清迈场景</em> · 妈妈台词
-      </div>
+<div class="panel" id="panel-chengyu">
+  <div class="input-section">
+    <span class="input-label">输入孩子说的英式中文 / 一个情境</span>
+    <textarea class="text-input" id="chengyuInput" rows="3" placeholder="例如：very many people at the market / 我们去夜市，人超级多 / I did it all at once"></textarea>
+    <div class="chips" style="margin-top:10px;">
+      <span class="chip-label">试试：</span>
+      <span class="chip cy" onclick="setCY('very many people')">very many people</span>
+      <span class="chip cy" onclick="setCY('我做事很快，一下子就完成了')">一下子就完成</span>
+      <span class="chip cy" onclick="setCY('去大象营看大象，很开心')">看大象很开心</span>
     </div>
+    <button class="go-btn-wide" id="chengyuBtn" onclick="runChengyu()">🌟 生成成语脚本</button>
   </div>
+  <div class="result" id="chengyuResult"></div>
+</div>
 
-    <div class="footer-nav"><a href="https://yyqdkp-del.github.io/Genchinese">← 返回根·中文主页</a></div>
+<!-- 文字化过渡 -->
 
-
+<div class="panel" id="panel-writing">
+  <div class="input-section">
+    <span class="input-label">孩子的口述内容（用语音输入或直接打）</span>
+    <textarea class="text-input" id="writingInput" rows="4" placeholder="例如：今天我们去夜市，那里很多人，我吃了芒果糯米饭，很好吃，我很开心"></textarea>
+    <input class="keyword-input" id="keywordsInput" type="text" placeholder="本周学的字/词（选填，如：明亮、休息、热闹）">
+    <div class="chips" style="margin-top:10px;">
+      <span class="chip-label">试试：</span>
+      <span class="chip cy" onclick="setWriting('今天去夜市，人很多很多，吃了芒果糯米饭，超级好吃')">夜市经历</span>
+      <span class="chip cy" onclick="setWriting('今天去大象营，大象鼻子很长，我摸了它，有点害怕但很好玩')">大象营经历</span>
+      <span class="chip cy" onclick="setWriting('今天下雨了，我在家看书，然后和妈妈一起做饼干')">下雨天在家</span>
+    </div>
+    <button class="go-btn-wide" id="writingBtn" onclick="runWriting()" style="background:linear-gradient(180deg,#7D3E9A 0%,#6C3483 100%);box-shadow:0 4px 14px rgba(108,52,131,0.25);">✍️ 生成作文脚本</button>
+  </div>
+  <div class="result" id="writingResult"></div>
 </div>
 
 <script>
-const LEVELS = {
-  R1:{color:"#922B21",bg:"#FFF0EE",label:"入门"},
-  R2:{color:"#BA4A00",bg:"#FFF6EE",label:"基础"},
-  R3:{color:"#1E8449",bg:"#EDFAF1",label:"进阶"},
-  R4:{color:"#2874A2",bg:"#EBF5FB",label:"提升"},
-  R5:{color:"#6C3483",bg:"#F4ECF7",label:"高阶"},
-};
-
-// History (sessionStorage so it resets per session)
-let history = [];
-
-function saveHistory(ch) {
-  if (!history.includes(ch)) {
-    history.unshift(ch);
-    if (history.length > 8) history.pop();
-  }
-  renderHistory();
-}
-
-function renderHistory() {
-  if (!history.length) return;
-  const bar = document.getElementById('historyBar');
-  const chips = document.getElementById('historyChips');
-  bar.style.display = 'flex';
-  chips.innerHTML = history.map(ch =>
-    `<div class="history-chip" onclick="doQuick('${ch}')">${ch}</div>`
-  ).join('');
-}
-
-function doQuick(ch) {
-  document.getElementById('charInput').value = ch;
-  doGenerate();
-}
-
-async function doGenerate() {
-  const ch = document.getElementById('charInput').value.trim();
-  if (!ch) return;
-
-  const btn = document.getElementById('genBtn');
-  const out = document.getElementById('output');
-
-  btn.disabled = true;
-  btn.textContent = '生成中…';
-
-  out.innerHTML = `
-    <div class="loading-state">
-      <span class="loading-char">${ch}</span>
-      <div class="loading-label">正在拆解这个字…</div>
-    </div>`;
-
-  try {
-    const res = await fetch('/api/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ char: ch })
-    });
-
-    const d = await res.json();
-    if (d.error) throw new Error(d.error);
-
-    saveHistory(ch);
-    renderCards(d, ch);
-
-  } catch(e) {
-    out.innerHTML = `<div class="error-state">⚠️ ${e.message}</div>`;
-  } finally {
-    btn.disabled = false;
-    btn.textContent = '🔍 拆解';
-  }
-}
-
-function renderCards(d, ch) {
-  const lv = d.level || 'R1';
-  const cfg = LEVELS[lv] || LEVELS.R1;
-  const parts = d.parts || [];
-  const exts = Array.isArray(d.extension) ? d.extension : [d.extension];
-  const qs = d.mom_questions || [];
-
-  const partsBoxes = parts.map(p => `
-    <div class="part-unit">
-      <div class="part-glyph">${p.char}</div>
-      <div class="part-desc">${p.image}</div>
-    </div>`).join('');
-
-  const partsPills = parts.map(p => `
-    <div class="part-pill">
-      <span class="part-pill-char">${p.char}</span>
-      <span>${p.name} · ${p.image}</span>
-    </div>`).join('');
-
-  const extLines = exts.filter(Boolean).map(e =>
-    `<div class="ext-line">· ${e}</div>`).join('');
-
-  const qItems = qs.map((q,i) => `
-    <div class="q-item">
-      <div class="q-num">${i+1}</div>
-      <div class="q-text">${q}</div>
-    </div>`).join('');
-
-  document.getElementById('output').innerHTML = `
-
-    <!-- 主卡 -->
-    <div class="card hero-card">
-      <div class="anim-stage">
-        <div class="parts-display" id="partsRow">${partsBoxes}</div>
-        <div class="merge-arrow" id="mergeArrow">↓ 合而为一</div>
-        <div class="merged-glyph" id="mergedGlyph">${ch}</div>
-      </div>
-      <div class="hero-meta">
-        <span class="pinyin-badge">${d.pinyin}</span>
-        <span class="level-badge" style="background:${cfg.bg};color:${cfg.color};">${lv} · ${cfg.label}</span>
-      </div>
-      <div class="meaning-line">${d.meaning}</div>
-      <div class="parts-summary">${partsPills}</div>
-    </div>
-
-    <!-- 故事卡 -->
-    <div class="card">
-      <span class="card-tag">📖 文化故事</span>
-      <div class="story-body">${d.story}</div>
-      <div class="scene-strip">
-        <div class="scene-tag">🌴 清迈场景</div>
-        <div class="scene-body">${d.scene}</div>
-      </div>
-    </div>
-
-    <!-- 词汇 + 成语 -->
-    <div class="card">
-      <div class="two-col">
-        <div class="col">
-          <div class="col-tag">🔤 延伸词汇</div>
-          ${extLines}
-        </div>
-        <div class="col-divider"></div>
-        <div class="col">
-          <div class="col-tag">🌟 成语</div>
-          <div class="cy-char">${d.chengyu}</div>
-          <div class="cy-body">${d.cy_story}</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 妈妈台词 -->
-    <div class="card mom-card" id="momCard">
-      <button class="mom-toggle" onclick="toggleMom()">
-        <div class="mom-toggle-left">
-          <div class="mom-title">👩 妈妈台词</div>
-          <div class="mom-sub" id="momSub">点击展开 · 3个引导问题</div>
-        </div>
-        <span class="mom-chevron" id="momChevron">⌄</span>
-      </button>
-      <div class="mom-body" id="momBody">
-        <div class="mom-sublabel">自然聊天，不是考试</div>
-        ${qItems}
-        <div class="tip-strip">
-          <div class="tip-label">💡 小贴士</div>
-          <div class="tip-text">问完后，让孩子用「${ch}」造一个句子。不需要正确，有趣就好。</div>
-        </div>
-      </div>
-    </div>
-
-  `;
-
-  // 动画序列
-  requestAnimationFrame(() => {
-    const row = document.getElementById('partsRow');
-    const arrow = document.getElementById('mergeArrow');
-    const merged = document.getElementById('mergedGlyph');
-    if (!row) return;
-
-    setTimeout(() => { row.classList.add('squeeze'); }, 200);
-    setTimeout(() => {
-      row.classList.add('vanish');
-      arrow.classList.add('show');
-    }, 900);
-    setTimeout(() => { merged.classList.add('appear'); }, 1200);
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', ['hanzi','chengyu','writing'][i] === tab);
   });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
 }
 
-function toggleMom() {
-  const body = document.getElementById('momBody');
-  const chevron = document.getElementById('momChevron');
-  const sub = document.getElementById('momSub');
-  const card = document.getElementById('momCard');
-  const open = body.style.display !== 'block';
-  body.style.display = open ? 'block' : 'none';
-  chevron.classList.toggle('open', open);
-  sub.textContent = open ? '点击收起' : '点击展开 · 3个引导问题';
-  card.style.background = open ? '#FFFDF8' : 'white';
+function setHanzi(c) { document.getElementById('hanziInput').value = c; }
+function setCY(t) { document.getElementById('chengyuInput').value = t; }
+function setWriting(t) { document.getElementById('writingInput').value = t; }
+
+async function callAPI(body) {
+  const res = await fetch('/api/generate', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(body)
+  });
+  return res.json();
 }
+
+// ── 汉字拆解 ──
+async function runHanzi() {
+  const char = document.getElementById('hanziInput').value.trim();
+  if (!char) return;
+  const btn = document.getElementById('hanziBtn');
+  const result = document.getElementById('hanziResult');
+  btn.disabled = true; btn.textContent = '生成中…';
+  result.className = 'result show';
+  result.innerHTML = '<div class="loading">正在拆解「' + char + '」<span class="loading-dots"></span></div>';
+  try {
+    const d = await callAPI({ mode:'hanzi', char });
+    if (d.error) { result.innerHTML = '<div class="error-box">⚠️ ' + d.error + '</div>'; return; }
+    result.innerHTML = `
+      <div class="hz-card">
+        <div class="hz-hero">
+          <div class="hz-char">${char}</div>
+          <div>
+            <div class="hz-meta-title">${d.pinyin || ''}</div>
+            <div class="hz-meta-meaning">${d.meaning || ''}</div>
+            <span class="hz-level">${d.level || ''}</span>
+          </div>
+        </div>
+        <div class="hz-row">
+          <div class="hz-row-label">字的零件</div>
+          <div class="hz-parts">${(d.parts||[]).map(p=>`<div class="hz-part" title="${p.name}">${p.char}</div>`).join('')}</div>
+          <div style="margin-top:10px;font-size:13px;color:var(--muted)">${(d.parts||[]).map(p=>`${p.char}＝${p.name}（${p.image}）`).join(' · ')}</div>
+        </div>
+        <div class="hz-row">
+          <div class="hz-row-label">造字故事</div>
+          <div class="hz-story">${d.story||''}</div>
+        </div>
+        <div class="hz-row">
+          <div class="hz-row-label">清迈场景</div>
+          <div class="hz-scene">🌿 ${d.scene||''}</div>
+        </div>
+        <div class="hz-row">
+          <div class="hz-row-label">妈妈台词 💬</div>
+          <div class="hz-mom">${(d.mom_questions||[]).map(q=>`<div class="hz-mom-q">${q}</div>`).join('')}</div>
+        </div>
+        ${d.extension?.length ? `<div class="hz-row">
+          <div class="hz-row-label">延伸词汇</div>
+          <div class="hz-ext">${d.extension.map(e=>`<div class="hz-ext-item">${e}</div>`).join('')}</div>
+        </div>` : ''}
+        ${d.chengyu ? `<div class="hz-row">
+          <div class="hz-row-label">相关成语</div>
+          <div class="hz-cy">
+            <div class="hz-cy-word">${d.chengyu}</div>
+            <div class="hz-cy-story">${d.cy_story||''}</div>
+          </div>
+        </div>` : ''}
+      </div>`;
+  } catch(e) {
+    result.innerHTML = '<div class="error-box">⚠️ 网络错误，请重试</div>';
+  } finally {
+    btn.disabled = false; btn.textContent = '🔍 拆解';
+  }
+}
+
+// ── 成语解读 ──
+async function runChengyu() {
+  const sentence = document.getElementById('chengyuInput').value.trim();
+  if (!sentence) return;
+  const btn = document.getElementById('chengyuBtn');
+  const result = document.getElementById('chengyuResult');
+  btn.disabled = true; btn.textContent = '生成中…';
+  result.className = 'result show';
+  result.innerHTML = '<div class="loading">正在生成成语脚本<span class="loading-dots"></span></div>';
+  try {
+    const d = await callAPI({ mode:'chengyu', sentence });
+    if (d.error) { result.innerHTML = '<div class="error-box">⚠️ ' + d.error + '</div>'; return; }
+    result.innerHTML = `
+      <div class="cy-card">
+        <div class="cy-hero">
+          <div class="cy-original">孩子说：「${d.original||sentence}」</div>
+          <div class="cy-issue">${d.issue||''}</div>
+          <div class="cy-word">${d.chengyu||''}</div>
+          <div class="cy-pinyin">${d.pinyin||''}</div>
+        </div>
+        <div class="cy-row">
+          <div class="cy-row-label">成语含义</div>
+          <div class="cy-meaning">${d.meaning||''}</div>
+        </div>
+        <div class="cy-row">
+          <div class="cy-row-label">来源故事</div>
+          <div class="cy-meaning">${d.story||''}</div>
+        </div>
+        <div class="cy-row">
+          <div class="cy-row-label">清迈场景</div>
+          <div class="cy-scene">🌿 ${d.chiangmai_scene||''}</div>
+        </div>
+        <div class="cy-row">
+          <div class="cy-row-label">妈妈台词 💬</div>
+          <div class="cy-mom-script">${d.mom_script||''}</div>
+        </div>
+        ${d.similar?.length ? `<div class="cy-row">
+          <div class="cy-row-label">近义成语</div>
+          <div class="cy-similar">${d.similar.map(s=>`<div class="cy-similar-item">${s}</div>`).join('')}</div>
+        </div>` : ''}
+      </div>`;
+  } catch(e) {
+    result.innerHTML = '<div class="error-box">⚠️ 网络错误，请重试</div>';
+  } finally {
+    btn.disabled = false; btn.textContent = '🌟 生成成语脚本';
+  }
+}
+
+// ── 文字化过渡 ──
+async function runWriting() {
+  const sentence = document.getElementById('writingInput').value.trim();
+  const keywords = document.getElementById('keywordsInput').value.trim();
+  if (!sentence) return;
+  const btn = document.getElementById('writingBtn');
+  const result = document.getElementById('writingResult');
+  btn.disabled = true; btn.textContent = '生成中…';
+  result.className = 'result show';
+  result.innerHTML = '<div class="loading">正在生成作文脚本<span class="loading-dots"></span></div>';
+  try {
+    const d = await callAPI({ mode:'writing', sentence, keywords });
+    if (d.error) { result.innerHTML = '<div class="error-box">⚠️ ' + d.error + '</div>'; return; }
+    result.innerHTML = `
+      <div class="wr-card">
+        <div class="wr-hero">
+          <div class="wr-hero-label">孩子口述</div>
+          <div class="wr-original-text">「${d.original||sentence}」</div>
+        </div>
+        <div class="wr-row">
+          <div class="wr-row-label">书面作文版本</div>
+          <div class="wr-draft">${d.draft||''}</div>
+        </div>
+        ${d.keywords_used?.length ? `<div class="wr-row">
+          <div class="wr-row-label">已融入的关键字</div>
+          <div class="wr-keywords">${d.keywords_used.map(k=>`<div class="wr-keyword">${k}</div>`).join('')}</div>
+        </div>` : ''}
+        ${d.fill_blanks ? `<div class="wr-row">
+          <div class="wr-row-label">填空练习版 ✏️</div>
+          <div class="wr-blanks">${d.fill_blanks}</div>
+        </div>` : ''}
+        <div class="wr-row">
+          <div class="wr-row-label">妈妈台词 💬</div>
+          <div class="wr-mom-script">${d.mom_script||''}</div>
+        </div>
+        ${d.tips ? `<div class="wr-row">
+          <div class="wr-row-label">小贴士</div>
+          <div class="wr-tips">💡 ${d.tips}</div>
+        </div>` : ''}
+      </div>`;
+  } catch(e) {
+    result.innerHTML = '<div class="error-box">⚠️ 网络错误，请重试</div>';
+  } finally {
+    btn.disabled = false; btn.textContent = '✍️ 生成作文脚本';
+  }
+}
+
+// 回车触发汉字拆解
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('hanziInput')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') runHanzi();
+  });
+  // URL参数自动填入
+  const params = new URLSearchParams(window.location.search);
+  const char = params.get('char');
+  if (char) {
+    document.getElementById('hanziInput').value = char;
+    runHanzi();
+  }
+});
 </script>
-
 
 </body>
 </html>
