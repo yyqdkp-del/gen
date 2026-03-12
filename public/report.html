@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>根·中文 · 读写能力报告</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    :root {
+      --navy:   #1A3C5E;
+      --navy2:  #2E6B9E;
+      --orange: #E8892A;
+      --orange2:#F5A64D;
+      --bg:     #F0F5FA;
+      --bg2:    #E8F0F8;
+      --white:  #FFFFFF;
+      --text:   #1A2B3C;
+      --muted:  #6B8BAA;
+      --gold:   #C8962A;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      font-family: 'Noto Sans SC', sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 0 60px;
+    }
+
+    /* ── TOP BAR ─────────────────────────── */
+    .topbar {
+      width: 100%;
+      background: var(--navy);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .topbar-logo {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--white);
+      letter-spacing: 2px;
+    }
+    .topbar-sub {
+      font-size: 12px;
+      color: #7EB8E0;
+      margin-top: 2px;
+    }
+
+    /* ── LOADING ─────────────────────────── */
+    #loading {
+      width: 100%;
+      max-width: 420px;
+      padding: 48px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .loading-icon {
+      width: 72px;
+      height: 72px;
+      background: var(--navy);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      margin-bottom: 24px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(26,60,94,0.3); }
+      50% { transform: scale(1.05); box-shadow: 0 0 0 12px rgba(26,60,94,0); }
+    }
+
+    .loading-title {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 6px;
+    }
+
+    .loading-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 36px;
+    }
+
+    .loading-steps {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      background: var(--white);
+      border-radius: 0;
+      opacity: 0;
+      transform: translateX(-16px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      border-bottom: 1px solid var(--bg2);
+    }
+    .step-item:first-child { border-radius: 12px 12px 0 0; }
+    .step-item:last-child  { border-radius: 0 0 12px 12px; border-bottom: none; }
+    .step-item.show { opacity: 1; transform: translateX(0); }
+    .step-item.done .step-dot { background: #34C77B; }
+    .step-item.done .step-dot::after { content: '✓'; font-size: 10px; color: white; }
+
+    .step-dot {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--bg2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.3s ease;
+      font-size: 13px;
+    }
+    .step-item.active .step-dot {
+      background: var(--orange);
+      animation: spin-dot 1s linear infinite;
+    }
+    @keyframes spin-dot {
+      0% { box-shadow: 0 0 0 0 rgba(232,137,42,0.4); }
+      100% { box-shadow: 0 0 0 8px rgba(232,137,42,0); }
+    }
+
+    .step-text {
+      font-size: 14px;
+      color: var(--text);
+    }
+    .step-item.done .step-text { color: var(--muted); }
+
+    /* ── REPORT WRAPPER ──────────────────── */
+    #report-wrapper {
+      display: none;
+      width: 100%;
+      max-width: 420px;
+      padding: 0 0 24px;
+    }
+
+    /* ── REPORT CARD (shareable) ─────────── */
+    #report-card {
+      background: var(--white);
+      margin: 0 16px;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(26,60,94,0.12);
+    }
+
+    /* Card Header */
+    .card-header {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%);
+      padding: 28px 24px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .card-header::before {
+      content: '';
+      position: absolute;
+      top: -30px; right: -30px;
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+    }
+    .card-header::after {
+      content: '';
+      position: absolute;
+      bottom: -20px; left: -20px;
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+    }
+
+    .card-meta {
+      font-size: 11px;
+      color: rgba(255,255,255,0.5);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .level-badge-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .level-badge {
+      background: var(--orange);
+      color: white;
+      font-family: 'Noto Serif SC', serif;
+      font-size: 22px;
+      font-weight: 900;
+      padding: 6px 18px;
+      border-radius: 8px;
+      letter-spacing: 1px;
+    }
+
+    .level-desc {
+      color: white;
+      font-size: 16px;
+      font-weight: 500;
+      opacity: 0.9;
+    }
+
+    .card-insight {
+      color: rgba(255,255,255,0.85);
+      font-size: 14px;
+      line-height: 1.75;
+      margin-top: 6px;
+    }
+
+    /* Card Body */
+    .card-body {
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Local line */
+    .local-line-block {
+      background: linear-gradient(135deg, #FEF3E2, #FFF8EE);
+      border-left: 4px solid var(--orange);
+      border-radius: 0 10px 10px 0;
+      padding: 14px 16px;
+      position: relative;
+    }
+    .local-line-label {
+      font-size: 10px;
+      color: var(--orange);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+    .local-line-text {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 14px;
+      line-height: 1.7;
+      color: #7A4A0A;
+      font-style: italic;
+    }
+
+    /* Info blocks */
+    .info-block {
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .info-block-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .info-block-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .icon-orange { background: #FEE8C8; }
+    .icon-blue   { background: #D6E8F8; }
+    .icon-green  { background: #D4F0E0; }
+
+    .info-block-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    .title-orange { color: var(--orange); }
+    .title-blue   { color: var(--navy2); }
+    .title-green  { color: #1B8A4C; }
+
+    .info-block-text {
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--text);
+      padding-left: 36px;
+    }
+
+    /* Feature rec */
+    .feature-block {
+      background: linear-gradient(135deg, #EAF2FA, #F0F8FF);
+      border-radius: 12px;
+      padding: 16px;
+      border: 1px solid rgba(46,107,158,0.15);
+    }
+    .feature-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--navy2);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .feature-text {
+      font-size: 13px;
+      line-height: 1.7;
+      color: #2A4A6A;
+    }
+
+    /* CTA in card */
+    .card-cta {
+      text-align: center;
+      padding: 16px;
+      background: var(--bg2);
+      border-radius: 12px;
+    }
+    .card-cta-text {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.6;
+    }
+
+    /* Card Footer */
+    .card-footer {
+      background: var(--navy);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .footer-brand {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 16px;
+      font-weight: 900;
+      color: white;
+      letter-spacing: 2px;
+    }
+    .footer-sub {
+      font-size: 11px;
+      color: rgba(255,255,255,0.5);
+      margin-top: 2px;
+    }
+    .footer-icon {
+      font-size: 28px;
+      opacity: 0.8;
+    }
+
+    /* ── ACTION BUTTONS (outside card) ───── */
+    .action-section {
+      padding: 20px 16px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .btn-save {
+      background: linear-gradient(135deg, var(--orange), var(--orange2));
+      color: white;
+      border: none;
+      border-radius: 14px;
+      padding: 18px;
+      font-size: 16px;
+      font-weight: 700;
+      font-family: 'Noto Sans SC', sans-serif;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 6px 20px rgba(232,137,42,0.35);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn-save:active {
+      transform: scale(0.97);
+      box-shadow: 0 3px 10px rgba(232,137,42,0.25);
+    }
+    .btn-save:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .contact-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btn-contact {
+      background: var(--white);
+      border: 1.5px solid var(--bg2);
+      border-radius: 12px;
+      padding: 14px 12px;
+      font-size: 14px;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-weight: 500;
+      color: var(--navy);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .btn-contact:hover {
+      background: var(--bg2);
+      border-color: var(--navy2);
+    }
+
+    .share-hint {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      padding: 4px 0;
+    }
+
+    /* ── SAVING OVERLAY ──────────────────── */
+    #saving-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(26,60,94,0.85);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+    }
+    #saving-overlay.show {
+      display: flex;
+    }
+    .saving-spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid rgba(255,255,255,0.2);
+      border-top-color: var(--orange);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .saving-text {
+      color: white;
+      font-size: 15px;
+      font-weight: 500;
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <!-- TOP BAR -->
+
+  <div class="topbar">
+    <div>
+      <div class="topbar-logo">根·中文</div>
+      <div class="topbar-sub">清迈陪读家庭中文读写启蒙</div>
+    </div>
+  </div>
+
+  <!-- LOADING STATE -->
+
+  <div id="loading">
+    <div class="loading-icon">🌿</div>
+    <div class="loading-title">正在分析中...</div>
+    <div class="loading-sub">根·中文学习顾问评估中</div>
+
+```
+<div class="loading-steps">
+  <div class="step-item" id="s1">
+    <div class="step-dot">🔍</div>
+    <div class="step-text">正在识别孩子的字理意识...</div>
+  </div>
+  <div class="step-item" id="s2">
+    <div class="step-dot">🌏</div>
+    <div class="step-text">根据清迈语言环境校准...</div>
+  </div>
+  <div class="step-item" id="s3">
+    <div class="step-dot">📊</div>
+    <div class="step-text">匹配读写能力 R 级别...</div>
+  </div>
+  <div class="step-item" id="s4">
+    <div class="step-dot">💡</div>
+    <div class="step-text">生成专属行动建议...</div>
+  </div>
+</div>
+```
+
+  </div>
+
+  <!-- REPORT -->
+
+  <div id="report-wrapper">
+
+```
+<div id="report-card">
+
+  <!-- Header -->
+  <div class="card-header">
+    <div class="card-meta">Gen Chinese · 读写能力评估报告</div>
+    <div class="level-badge-row">
+      <div class="level-badge" id="r-level">R3</div>
+      <div class="level-desc" id="r-level-desc">识字起步期</div>
+    </div>
+    <div class="card-insight" id="r-insight"></div>
+  </div>
+
+  <!-- Body -->
+  <div class="card-body">
+
+    <!-- 清迈共鸣金句 -->
+    <div class="local-line-block">
+      <div class="local-line-label">清迈视角</div>
+      <div class="local-line-text" id="r-local"></div>
+    </div>
+
+    <!-- 卡点 -->
+    <div class="info-block">
+      <div class="info-block-label">
+        <div class="info-block-icon icon-orange">📌</div>
+        <div class="info-block-title title-orange">当前最大卡点</div>
+      </div>
+      <div class="info-block-text" id="r-block"></div>
+    </div>
+
+    <!-- 行动建议 -->
+    <div class="info-block">
+      <div class="info-block-label">
+        <div class="info-block-icon icon-green">✅</div>
+        <div class="info-block-title title-green">接下来 30 天做一件事</div>
+      </div>
+      <div class="info-block-text" id="r-action"></div>
+    </div>
+
+    <!-- 功能推荐 -->
+    <div class="feature-block">
+      <div class="feature-title">推荐功能</div>
+      <div class="feature-text" id="r-feature"></div>
+    </div>
+
+    <!-- CTA -->
+    <div class="card-cta">
+      <div class="card-cta-text" id="r-cta"></div>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="card-footer">
+    <div>
+      <div class="footer-brand">根·中文</div>
+      <div class="footer-sub">genchinese.com · 清迈陪读家庭专属</div>
+    </div>
+    <div class="footer-icon">🌿</div>
+  </div>
+
+</div>
+
+<!-- Action Buttons (outside card, won't appear in screenshot) -->
+<div class="action-section" id="action-buttons">
+
+  <button class="btn-save" id="btn-save" onclick="saveReportImage()">
+    📱 保存报告图片到手机
+  </button>
+
+  <div class="share-hint">保存后发给需要的妈妈朋友 🌿</div>
+
+  <div class="contact-row">
+    <a class="btn-contact" href="https://line.me/ti/p/GenChinese" target="_blank">
+      💬 Line 顾问
+    </a>
+    <a class="btn-contact" href="https://tally.so/r/Gx1v4z" target="_blank">
+      🎁 免费测评包
+    </a>
+  </div>
+
+</div>
+```
+
+  </div>
+
+  <!-- Saving Overlay -->
+
+  <div id="saving-overlay">
+    <div class="saving-spinner"></div>
+    <div class="saving-text">正在生成长图...</div>
+  </div>
+
+  <script>
+    // ─────────────────────────────────────────
+    // Loading animation
+    // ─────────────────────────────────────────
+    function runLoadingAnimation(callback) {
+      const steps = ['s1', 's2', 's3', 's4'];
+      steps.forEach((id, i) => {
+        setTimeout(() => {
+          const el = document.getElementById(id);
+          el.classList.add('show', 'active');
+
+          // Mark previous as done
+          if (i > 0) {
+            const prev = document.getElementById(steps[i - 1]);
+            prev.classList.remove('active');
+            prev.classList.add('done');
+            prev.querySelector('.step-dot').textContent = '✓';
+          }
+
+          // All done
+          if (i === steps.length - 1) {
+            setTimeout(() => {
+              el.classList.remove('active');
+              el.classList.add('done');
+              el.querySelector('.step-dot').textContent = '✓';
+              setTimeout(callback, 400);
+            }, 900);
+          }
+        }, i * 950);
+      });
+    }
+
+    // ─────────────────────────────────────────
+    // Render report
+    // ─────────────────────────────────────────
+    function renderReport(data) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('report-wrapper').style.display = 'block';
+
+      document.getElementById('r-level').textContent       = data.level;
+      document.getElementById('r-level-desc').textContent  = data.level_desc;
+      document.getElementById('r-insight').textContent     = data.insight;
+      document.getElementById('r-local').textContent       = data.local_line;
+      document.getElementById('r-block').textContent       = data.blockpoint;
+      document.getElementById('r-action').textContent      = data.action;
+      document.getElementById('r-feature').textContent     = data.feature_rec;
+      document.getElementById('r-cta').textContent         = data.cta;
+    }
+
+    // ─────────────────────────────────────────
+    // Save as image (html2canvas)
+    // ─────────────────────────────────────────
+    async function saveReportImage() {
+      const btn = document.getElementById('btn-save');
+      const actions = document.getElementById('action-buttons');
+      const overlay = document.getElementById('saving-overlay');
+
+      btn.disabled = true;
+      overlay.classList.add('show');
+
+      // Hide buttons before capture
+      actions.style.display = 'none';
+
+      try {
+        const card = document.getElementById('report-card');
+        const canvas = await html2canvas(card, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#FFFFFF',
+          logging: false,
+          onclone: (clonedDoc) => {
+            // Ensure fonts are loaded in clone
+            clonedDoc.getElementById('report-card').style.borderRadius = '20px';
+          }
+        });
+
+        // Trigger download
+        const link = document.createElement('a');
+        link.download = '根中文_读写能力报告.jpg';
+        link.href = canvas.toDataURL('image/jpeg', 0.92);
+        link.click();
+
+      } catch (err) {
+        console.error('Screenshot error:', err);
+        alert('截图失败，请长按报告截屏保存 📸');
+      } finally {
+        actions.style.display = 'flex';
+        actions.style.flexDirection = 'column';
+        overlay.classList.remove('show');
+        btn.disabled = false;
+      }
+    }
+
+    // ─────────────────────────────────────────
+    // Fallback report
+    // ─────────────────────────────────────────
+    const FALLBACK = {
+      level: "R3",
+      level_desc: "识字起步期",
+      insight: "根据你的填写，孩子正处于汉字认知的关键窗口期，音形义还没完全连起来——这很正常，G2-G3 是最常见的分水岭。",
+      local_line: "在清迈这种多语环境长大的孩子，英文跑得快很正常——中文我们慢火炖，火候到了自然香。",
+      blockpoint: "汉字对孩子来说还像一张张图片，字和意思之间的连接还没建立起来，遇到陌生字容易放弃。",
+      action: "每天用汉字拆解器拆1个字，妈妈念台词，孩子猜画面，10分钟够了。",
+      feature_rec: "推荐从汉字拆解器开始，让孩子发现汉字是有规律的零件，不是要死记的图画。等识字量到500+，再开成语表达模块。",
+      cta: "最好的干预时机就是现在。先免费试用，看看孩子的反应。🌿"
+    };
+
+    // ─────────────────────────────────────────
+    // Parse URL params → answers object
+    // 支持 Tally 传来的扁平参数格式：
+    // ?q1=G2&q2=BCIS&q3=中英混用&q75=like_picture...
+    // ─────────────────────────────────────────
+    function parseAnswersFromURL() {
+      const p = new URLSearchParams(window.location.search);
+      return {
+        q1:     p.get('q1')  || '',   // 年级
+        q2:     p.get('q2')  || '',   // 学校
+        q3:     p.get('q3')  || '',   // 家庭语言
+        q4:     p.get('q4')  || '',   // 绘本阅读
+        q5:     p.get('q5')  || '',   // 无图理解
+        q6:     p.get('q6')  || '',   // 认字数量
+        q7:     p.get('q7')  || '',   // 拼音依赖
+        q75:    p.get('q75') || '',   // 影子题（字理意识）
+        q8:     p.get('q8')  || '',   // 写句子
+        q9:     p.get('q9')  || '',   // 阅读意愿（R3/R4分水岭）
+        q10:    p.get('q10') || '',   // 中英对比
+        source: p.get('source') || '' // 隐藏来源字段（投放追踪）
+      };
+    }
+
+    // ─────────────────────────────────────────
+    // Main: fetch report from API
+    // ─────────────────────────────────────────
+    async function main() {
+      const p        = new URLSearchParams(window.location.search);
+      const fallback = p.get('fallback');
+      const answers  = parseAnswersFromURL();
+
+      // 判断是否有实际答案（非全空）
+      const hasAnswers = Object.entries(answers)
+        .filter(([k]) => k !== 'source')
+        .some(([, v]) => v !== '');
+
+      // 无答案时直接降级
+      if (!hasAnswers && !fallback) {
+        runLoadingAnimation(() => renderReport(FALLBACK));
+        return;
+      }
+
+      runLoadingAnimation(async () => {
+        try {
+          const res = await fetch('/api/assess', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ answers })
+          });
+
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+          const data = await res.json();
+          renderReport(data.level ? data : FALLBACK);
+
+        } catch (err) {
+          console.error('API error:', err);
+          renderReport(FALLBACK);
+        }
+      });
+    }
+
+    main();
+  </script>
+
+</body>
+</html>
