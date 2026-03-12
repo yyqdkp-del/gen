@@ -725,18 +725,18 @@
     function parseAnswersFromURL() {
       const p = new URLSearchParams(window.location.search);
       return {
-        q1:     p.get('q1')  || '',   // 年级
-        q2:     p.get('q2')  || '',   // 学校
-        q3:     p.get('q3')  || '',   // 家庭语言
-        q4:     p.get('q4')  || '',   // 绘本阅读
-        q5:     p.get('q5')  || '',   // 无图理解
-        q6:     p.get('q6')  || '',   // 认字数量
-        q7:     p.get('q7')  || '',   // 拼音依赖
-        q75:    p.get('q75') || '',   // 影子题（字理意识）
-        q8:     p.get('q8')  || '',   // 写句子
-        q9:     p.get('q9')  || '',   // 阅读意愿（R3/R4分水岭）
-        q10:    p.get('q10') || '',   // 中英对比
-        source: p.get('source') || '' // 隐藏来源字段（投放追踪）
+        q1:     p.get('q1')  || p.get('p1')  || '',
+        q2:     p.get('q2')  || p.get('p2')  || '',
+        q3:     p.get('q3')  || p.get('p3')  || '',
+        q4:     p.get('q4')  || p.get('p4')  || '',
+        q5:     p.get('q5')  || p.get('p5')  || '',
+        q6:     p.get('q6')  || p.get('p6')  || '',
+        q7:     p.get('q7')  || p.get('p7')  || '',
+        q75:    p.get('q75') || p.get('p8')  || '',
+        q8:     p.get('q8')  || p.get('p9')  || '',
+        q9:     p.get('q9')  || p.get('p10') || '',
+        q10:    p.get('q10') || p.get('p11') || '',
+        source: p.get('source') || ''
       };
     }
 
