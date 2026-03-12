@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>根·中文 · 控制台</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0D0D0D;
+  --surface: #161616;
+  --surface2: #1E1E1E;
+  --border: rgba(255,255,255,0.08);
+  --red: #E05A44;
+  --gold: #C9A84C;
+  --green: #4CAF7D;
+  --blue: #4A9EE0;
+  --purple: #9B7AE0;
+  --text: #F0EDE8;
+  --muted: #7A7470;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:'Noto Serif SC',serif; min-height:100vh; }
+
+/* LOGIN */
+.login-screen {
+min-height:100vh; display:flex; align-items:center; justify-content:center;
+background: radial-gradient(ellipse at 50% 0%, rgba(192,57,43,0.15) 0%, transparent 60%);
+}
+.login-box { text-align:center; width:320px; }
+.login-logo { font-size:64px; color:var(–red); margin-bottom:8px; font-weight:700; }
+.login-sub { font-size:12px; color:var(–muted); letter-spacing:3px; text-transform:uppercase; margin-bottom:48px; }
+.login-input {
+width:100%; padding:14px 18px; background:var(–surface); border:1px solid var(–border);
+border-radius:6px; color:var(–text); font-size:15px; text-align:center;
+margin-bottom:12px; outline:none; font-family:var(–font-mono);
+transition:border-color 0.2s;
+}
+.login-input:focus { border-color:var(–red); }
+.login-btn {
+width:100%; padding:14px; background:var(–red); border:none; border-radius:6px;
+color:#fff; font-size:15px; font-weight:600; cursor:pointer;
+font-family:‘Noto Serif SC’,serif; transition:all 0.2s;
+}
+.login-btn:hover { background:#C84030; }
+.login-error { font-size:13px; color:var(–red); margin-top:8px; }
+
+/* LAYOUT */
+.app { display:none; min-height:100vh; }
+.sidebar {
+position:fixed; top:0; left:0; bottom:0; width:220px;
+background:var(–surface); border-right:1px solid var(–border);
+display:flex; flex-direction:column;
+}
+.sidebar-logo { padding:24px 20px; border-bottom:1px solid var(–border); }
+.sidebar-logo h1 { font-size:18px; color:var(–red); font-weight:700; }
+.sidebar-logo p { font-size:11px; color:var(–muted); margin-top:2px; }
+.nav { flex:1; padding:12px 0; overflow-y:auto; }
+.nav-item {
+display:flex; align-items:center; gap:10px;
+padding:10px 20px; font-size:13px; color:var(–muted);
+cursor:pointer; transition:all 0.15s; border-left:2px solid transparent;
+}
+.nav-item:hover { color:var(–text); background:rgba(255,255,255,0.03); }
+.nav-item.active { color:var(–text); border-left-color:var(–red); background:rgba(224,90,68,0.08); }
+.nav-item .icon { font-size:16px; width:20px; }
+.sidebar-footer { padding:16px 20px; border-top:1px solid var(–border); font-size:11px; color:var(–muted); }
+
+.main { margin-left:220px; padding:32px; min-height:100vh; }
+.page { display:none; }
+.page.active { display:block; }
+.page-title { font-size:22px; font-weight:700; color:var(–text); margin-bottom:4px; }
+.page-sub { font-size:13px; color:var(–muted); margin-bottom:32px; }
+
+/* CARDS */
+.cards { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:32px; }
+.card {
+background:var(–surface); border:1px solid var(–border);
+border-radius:10px; padding:20px;
+}
+.card-label { font-size:11px; color:var(–muted); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
+.card-value { font-size:32px; font-weight:700; font-family:var(–font-mono); }
+.card-value.red { color:var(–red); }
+.card-value.gold { color:var(–gold); }
+.card-value.green { color:var(–green); }
+.card-value.blue { color:var(–blue); }
+.card-sub { font-size:12px; color:var(–muted); margin-top:4px; }
+
+/* GRID 2 */
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:32px; }
+.grid3 { display:grid; grid-template-columns:2fr 1fr; gap:16px; margin-bottom:32px; }
+.panel {
+background:var(–surface); border:1px solid var(–border);
+border-radius:10px; padding:24px;
+}
+.panel-title { font-size:13px; color:var(–muted); letter-spacing:2px; text-transform:uppercase; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; }
+.panel-title span { color:var(–text); font-size:15px; font-weight:600; letter-spacing:0; text-transform:none; }
+
+/* CHART */
+.chart-bars { display:flex; align-items:flex-end; gap:8px; height:120px; }
+.chart-bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; height:100%; justify-content:flex-end; }
+.chart-bar { width:100%; background:var(–red); border-radius:3px 3px 0 0; min-height:3px; opacity:0.8; transition:opacity 0.2s; }
+.chart-bar:hover { opacity:1; }
+.chart-label { font-size:10px; color:var(–muted); font-family:var(–font-mono); }
+
+/* MODE BARS */
+.mode-bars { display:flex; flex-direction:column; gap:14px; }
+.mode-bar-row { display:flex; flex-direction:column; gap:6px; }
+.mode-bar-info { display:flex; justify-content:space-between; font-size:13px; }
+.mode-bar-track { height:6px; background:var(–surface2); border-radius:3px; overflow:hidden; }
+.mode-bar-fill { height:100%; border-radius:3px; transition:width 0.8s ease; }
+
+/* TOP CHARS */
+.top-chars { display:flex; flex-direction:column; gap:8px; }
+.char-row { display:flex; align-items:center; gap:12px; }
+.char-rank { font-size:11px; color:var(–muted); font-family:var(–font-mono); width:20px; }
+.char-zh { font-size:24px; color:var(–red); min-width:32px; }
+.char-bar-wrap { flex:1; }
+.char-bar-track { height:4px; background:var(–surface2); border-radius:2px; overflow:hidden; }
+.char-bar-fill { height:100%; background:var(–red); border-radius:2px; opacity:0.6; }
+.char-count { font-size:12px; color:var(–muted); font-family:var(–font-mono); min-width:30px; text-align:right; }
+
+/* TABLE */
+.table-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th { text-align:left; padding:10px 12px; color:var(–muted); font-weight:400; font-size:11px; letter-spacing:1px; text-transform:uppercase; border-bottom:1px solid var(–border); }
+td { padding:12px; border-bottom:1px solid var(–border); vertical-align:middle; }
+tr:hover td { background:rgba(255,255,255,0.02); }
+.badge { padding:2px 8px; border-radius:12px; font-size:11px; font-weight:600; }
+.badge-free { background:rgba(74,158,224,0.15); color:var(–blue); }
+.badge-paid { background:rgba(76,175,125,0.15); color:var(–green); }
+.badge-vip { background:rgba(201,168,76,0.15); color:var(–gold); }
+.badge-pending { background:rgba(224,90,68,0.15); color:var(–red); }
+.action-btn { padding:4px 10px; border-radius:4px; border:1px solid var(–border); background:transparent; color:var(–muted); font-size:11px; cursor:pointer; transition:all 0.15s; }
+.action-btn:hover { border-color:var(–red); color:var(–red); }
+.action-btn.del:hover { border-color:#E05A44; color:#E05A44; }
+
+/* SETTINGS */
+.settings-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.setting-item {
+background:var(–surface2); border:1px solid var(–border);
+border-radius:8px; padding:20px;
+display:flex; align-items:center; justify-content:space-between;
+}
+.setting-info h4 { font-size:14px; margin-bottom:4px; }
+.setting-info p { font-size:12px; color:var(–muted); }
+.toggle { width:44px; height:24px; background:var(–border); border-radius:12px; position:relative; cursor:pointer; transition:background 0.2s; }
+.toggle.on { background:var(–green); }
+.toggle::after { content:’’; position:absolute; top:3px; left:3px; width:18px; height:18px; background:#fff; border-radius:50%; transition:left 0.2s; }
+.toggle.on::after { left:23px; }
+.number-input { width:80px; padding:6px 10px; background:var(–surface); border:1px solid var(–border); border-radius:4px; color:var(–text); font-size:14px; font-family:var(–font-mono); text-align:center; outline:none; }
+.number-input:focus { border-color:var(–gold); }
+.select-input { padding:6px 10px; background:var(–surface); border:1px solid var(–border); border-radius:4px; color:var(–text); font-size:13px; outline:none; cursor:pointer; }
+.select-input:focus { border-color:var(–gold); }
+
+/* FORM */
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+.form-group { display:flex; flex-direction:column; gap:6px; }
+.form-label { font-size:11px; color:var(–muted); letter-spacing:1px; text-transform:uppercase; }
+.form-input {
+padding:10px 12px; background:var(–surface2); border:1px solid var(–border);
+border-radius:6px; color:var(–text); font-size:14px; outline:none;
+font-family:‘Noto Serif SC’,serif; transition:border-color 0.2s;
+}
+.form-input:focus { border-color:var(–gold); }
+.form-select { padding:10px 12px; background:var(–surface2); border:1px solid var(–border); border-radius:6px; color:var(–text); font-size:14px; outline:none; cursor:pointer; }
+.save-btn {
+padding:10px 24px; background:var(–red); border:none; border-radius:6px;
+color:#fff; font-size:14px; font-weight:600; cursor:pointer;
+font-family:‘Noto Serif SC’,serif; transition:all 0.2s;
+}
+.save-btn:hover { background:#C84030; }
+.cancel-btn { padding:10px 20px; background:transparent; border:1px solid var(–border); border-radius:6px; color:var(–muted); font-size:14px; cursor:pointer; margin-right:8px; }
+
+/* MODAL */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000; display:none; align-items:center; justify-content:center; }
+.modal-overlay.show { display:flex; }
+.modal { background:var(–surface); border:1px solid var(–border); border-radius:12px; padding:32px; width:520px; max-width:90vw; }
+.modal h3 { font-size:18px; margin-bottom:20px; }
+
+/* LOGS */
+.log-row { display:flex; gap:12px; padding:10px 0; border-bottom:1px solid var(–border); font-size:12px; font-family:var(–font-mono); }
+.log-time { color:var(–muted); min-width:160px; }
+.log-mode { min-width:80px; }
+.log-mode.hanzi { color:var(–blue); }
+.log-mode.chengyu { color:var(–gold); }
+.log-mode.writing { color:var(–purple); }
+.log-input { color:var(–text); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.log-status.ok { color:var(–green); }
+.log-status.err { color:var(–red); }
+
+/* TOAST */
+.toast { position:fixed; bottom:24px; right:24px; background:var(–green); color:#fff; padding:12px 20px; border-radius:6px; font-size:14px; z-index:2000; display:none; animation:slideIn 0.3s ease; }
+@keyframes slideIn { from { transform:translateY(20px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+
+.loading-spinner { text-align:center; padding:40px; color:var(–muted); font-size:13px; }
+
+@media (max-width:900px) {
+.sidebar { width:60px; }
+.sidebar-logo, .nav-item span, .sidebar-footer { display:none; }
+.nav-item { justify-content:center; padding:14px; }
+.main { margin-left:60px; padding:20px; }
+.cards { grid-template-columns:repeat(2,1fr); }
+.grid2, .grid3, .settings-grid { grid-template-columns:1fr; }
+}
+</style>
+
+</head>
+<body>
+
+<!-- LOGIN -->
+
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">根</div>
+    <div class="login-sub">Gen Chinese · Admin</div>
+    <input class="login-input" id="pwInput" type="password" placeholder="输入管理员密码" autocomplete="current-password">
+    <button class="login-btn" onclick="login()">进入控制台</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<!-- APP -->
+
+<div class="app" id="app">
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <h1>根·中文</h1>
+      <p>Admin Console</p>
+    </div>
+    <nav class="nav">
+      <div class="nav-item active" onclick="showPage('dashboard')"><span class="icon">📊</span><span>数据总览</span></div>
+      <div class="nav-item" onclick="showPage('users')"><span class="icon">👥</span><span>用户管理</span></div>
+      <div class="nav-item" onclick="showPage('logs')"><span class="icon">📋</span><span>调用日志</span></div>
+      <div class="nav-item" onclick="showPage('settings')"><span class="icon">⚙️</span><span>功能设置</span></div>
+      <div class="nav-item" onclick="showPage('content')"><span class="icon">🀄</span><span>词库管理</span></div>
+    </nav>
+    <div class="sidebar-footer">Gen Chinese v2.0</div>
+  </div>
+
+  <main class="main">
+
+```
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="page-title">数据总览</div>
+  <div class="page-sub">实时监控使用情况和业务指标</div>
+  <div class="cards" id="statsCards">
+    <div class="card"><div class="card-label">今日调用</div><div class="card-value red" id="statToday">—</div><div class="card-sub">次 API 请求</div></div>
+    <div class="card"><div class="card-label">本周调用</div><div class="card-value gold" id="statWeek">—</div><div class="card-sub">次</div></div>
+    <div class="card"><div class="card-label">成功率</div><div class="card-value green" id="statSuccess">—</div><div class="card-sub">% 请求成功</div></div>
+    <div class="card"><div class="card-label">注册用户</div><div class="card-value blue" id="statUsers">—</div><div class="card-sub">位妈妈</div></div>
+  </div>
+  <div class="grid3">
+    <div class="panel">
+      <div class="panel-title">最近7天调用趋势</div>
+      <div class="chart-bars" id="trendChart"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">功能使用分布</div>
+      <div class="mode-bars" id="modeBars"></div>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="panel">
+      <div class="panel-title">热门汉字 Top 10</div>
+      <div class="top-chars" id="topChars"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">业务指标</div>
+      <div style="display:flex;flex-direction:column;gap:16px;margin-top:8px;" id="bizMetrics"></div>
+    </div>
+  </div>
+</div>
+
+<!-- USERS -->
+<div class="page" id="page-users">
+  <div class="page-title">用户管理</div>
+  <div class="page-sub">管理测评申请和付费用户</div>
+  <div style="display:flex;gap:10px;margin-bottom:20px;">
+    <button class="save-btn" onclick="showAddUser()">+ 添加用户</button>
+    <input type="text" class="form-input" id="userSearch" placeholder="搜索姓名/微信..." oninput="filterUsers()" style="width:220px;padding:8px 12px;">
+    <select class="form-select" id="userFilter" onchange="filterUsers()">
+      <option value="">全部状态</option>
+      <option value="free">免费</option>
+      <option value="paid">付费</option>
+      <option value="vip">VIP</option>
+      <option value="pending">待跟进</option>
+    </select>
+  </div>
+  <div class="panel">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>姓名</th><th>微信/Line</th><th>孩子年级</th><th>学校</th><th>状态</th><th>使用次数</th><th>备注</th><th>操作</th></tr></thead>
+        <tbody id="usersTable"><tr><td colspan="8" class="loading-spinner">加载中...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- LOGS -->
+<div class="page" id="page-logs">
+  <div class="page-title">调用日志</div>
+  <div class="page-sub">最近100条 API 调用记录</div>
+  <div class="panel">
+    <div style="display:flex;gap:10px;margin-bottom:16px;">
+      <select class="form-select" id="logFilter" onchange="filterLogs()">
+        <option value="">全部功能</option>
+        <option value="hanzi">汉字拆解</option>
+        <option value="chengyu">成语解读</option>
+        <option value="writing">文字化过渡</option>
+      </select>
+    </div>
+    <div id="logsContainer"><div class="loading-spinner">加载中...</div></div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="page" id="page-settings">
+  <div class="page-title">功能设置</div>
+  <div class="page-sub">控制系统功能和限制</div>
+  <div class="settings-grid" id="settingsGrid">
+    <div class="loading-spinner" style="grid-column:span 2">加载中...</div>
+  </div>
+</div>
+
+<!-- LEXICON -->
+<div class="page" id="page-content">
+  <div class="page-title">词库管理</div>
+  <div class="page-sub">管理汉字词库 · 拆解零件 · 造字故事</div>
+
+  <!-- 搜索 + 操作栏 -->
+  <div style="display:flex;gap:10px;margin-bottom:20px;align-items:center;flex-wrap:wrap;">
+    <button class="save-btn" onclick="showAddChar()">＋ 添加汉字</button>
+    <input type="text" class="form-input" id="charSearch" placeholder="搜索汉字或拼音..." oninput="filterChars()" style="width:200px;padding:8px 12px;">
+    <select class="form-select" id="charFilter" onchange="filterChars()">
+      <option value="">全部等级</option>
+      <option value="R1">R1</option><option value="R2">R2</option>
+      <option value="R3">R3</option><option value="R4">R4</option><option value="R5">R5</option>
+    </select>
+    <div style="margin-left:auto;font-size:12px;color:var(--muted)" id="charCount"></div>
+  </div>
+
+  <!-- 词库表格 -->
+  <div class="panel">
+    <div class="table-wrap">
+      <table id="charTable">
+        <thead>
+          <tr>
+            <th style="width:80px">汉字</th>
+            <th style="width:100px">拼音</th>
+            <th style="width:70px">等级</th>
+            <th>基本释义</th>
+            <th>零件拆解</th>
+            <th style="width:80px;text-align:center">语音</th>
+            <th style="width:100px">操作</th>
+          </tr>
+        </thead>
+        <tbody id="charTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+```
+
+  </main>
+</div>
+
+<!-- USER MODAL -->
+
+<div class="modal-overlay" id="userModal">
+  <div class="modal">
+    <h3 id="modalTitle">添加用户</h3>
+    <input type="hidden" id="editUserId">
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">姓名</label><input class="form-input" id="uName" placeholder="妈妈姓名"></div>
+      <div class="form-group"><label class="form-label">微信 ID</label><input class="form-input" id="uWechat" placeholder="微信号"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Line ID</label><input class="form-input" id="uLine" placeholder="Line ID"></div>
+      <div class="form-group"><label class="form-label">邮箱</label><input class="form-input" id="uEmail" placeholder="邮箱地址"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">孩子年级</label>
+        <select class="form-select" id="uGrade">
+          <option value="">选择年级</option>
+          <option>K1</option><option>K2</option><option>K3</option>
+          <option>G1</option><option>G2</option><option>G3</option>
+          <option>G4</option><option>G5</option><option>G6</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">学校</label><input class="form-input" id="uSchool" placeholder="如：BCIS"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">状态</label>
+        <select class="form-select" id="uStatus">
+          <option value="free">免费</option>
+          <option value="pending">待跟进</option>
+          <option value="paid">付费</option>
+          <option value="vip">VIP</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">使用次数</label><input class="form-input" id="uUsage" type="number" value="0"></div>
+    </div>
+    <div class="form-group" style="margin-bottom:20px;"><label class="form-label">备注</label><input class="form-input" id="uNotes" placeholder="备注信息"></div>
+    <div style="display:flex;gap:8px;">
+      <button class="cancel-btn" onclick="closeModal()">取消</button>
+      <button class="save-btn" onclick="saveUser()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHAR MODAL -->
+
+<div class="modal-overlay" id="charModal">
+  <div class="modal" style="width:600px;max-height:90vh;overflow-y:auto;">
+    <h3 id="charModalTitle" style="margin-bottom:24px;">添加汉字</h3>
+    <input type="hidden" id="editCharId">
+
+```
+<!-- 第一行：汉字 + 拼音 + 等级 -->
+<div style="display:grid;grid-template-columns:80px 1fr 100px;gap:12px;margin-bottom:16px;">
+  <div class="form-group">
+    <label class="form-label">汉字</label>
+    <input class="form-input" id="cChar" placeholder="明" maxlength="1"
+      style="font-size:32px;text-align:center;padding:8px;height:56px;font-weight:700;color:var(--red);">
+  </div>
+  <div class="form-group">
+    <label class="form-label">拼音</label>
+    <input class="form-input" id="cPinyin" placeholder="míng" style="height:56px;font-size:16px;">
+  </div>
+  <div class="form-group">
+    <label class="form-label">难度等级</label>
+    <select class="form-select" id="cLevel" style="height:56px;font-size:14px;">
+      <option value="R1">R1</option><option value="R2">R2</option>
+      <option value="R3">R3</option><option value="R4">R4</option><option value="R5">R5</option>
+    </select>
+  </div>
+</div>
+
+<!-- 基本释义 -->
+<div class="form-group" style="margin-bottom:16px;">
+  <label class="form-label">基本释义</label>
+  <input class="form-input" id="cMeaning" placeholder="如：明亮、光明；聪明、明白">
+</div>
+
+<!-- 零件拆解 -->
+<div class="form-group" style="margin-bottom:16px;">
+  <label class="form-label">汉字零件拆解</label>
+  <input class="form-input" id="cParts" placeholder="如：日，月（日月合在一起就是明亮的明）">
+</div>
+
+<!-- 造字故事 -->
+<div class="form-group" style="margin-bottom:16px;">
+  <label class="form-label">清迈造字故事 / 妈妈台词</label>
+  <textarea class="form-input" id="cStory" rows="5"
+    placeholder="妈妈指着窗外说：你看，太阳（日）和月亮（月）同时出现在天空，那就是最明亮的时刻！所以'明'字，就是日加月，代表光明..."
+    style="resize:vertical;line-height:1.7;"></textarea>
+</div>
+
+<!-- 音频URL -->
+<div class="form-group" style="margin-bottom:24px;">
+  <label class="form-label">音频文件链接 URL</label>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <input class="form-input" id="cAudio" placeholder="https://... .mp3" style="flex:1;">
+    <button class="action-btn" id="previewAudioBtn" onclick="previewAudio()" style="padding:8px 12px;white-space:nowrap;">▶ 试听</button>
+  </div>
+  <audio id="audioPreview" style="display:none;margin-top:8px;width:100%;" controls></audio>
+</div>
+
+<div style="display:flex;gap:8px;">
+  <button class="cancel-btn" onclick="closeCharModal()">取消</button>
+  <button class="save-btn" onclick="saveChar()">保存汉字</button>
+</div>
+```
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let token = '';
+let allUsers = [];
+let allLogs = [];
+
+async function login() {
+  const pw = document.getElementById('pwInput').value;
+  try {
+    const r = await fetch('/api/admin?action=stats', {
+      headers: { 'Authorization': `Bearer ${pw}` }
+    });
+    if (r.status === 401) {
+      document.getElementById('loginError').textContent = '密码错误';
+      return;
+    }
+    token = pw;
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    loadDashboard();
+  } catch(e) {
+    document.getElementById('loginError').textContent = '连接失败，请重试';
+  }
+}
+
+document.getElementById('pwInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') login();
+});
+
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.nav-item')[['dashboard','users','logs','settings','content'].indexOf(page)].classList.add('active');
+  if (page === 'users') loadUsers();
+  if (page === 'logs') loadLogs();
+  if (page === 'settings') loadSettings();
+  if (page === 'content') loadChars();
+}
+
+async function api(action, method='GET', body=null) {
+  const opts = { method, headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` } };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(`/api/admin?action=${action}`, opts);
+  return r.json();
+}
+
+async function loadDashboard() {
+  const d = await api('stats');
+  document.getElementById('statToday').textContent = d.today || 0;
+  document.getElementById('statWeek').textContent = d.week || 0;
+  document.getElementById('statSuccess').textContent = d.success_rate || 0;
+  document.getElementById('statUsers').textContent = d.total_users || 0;
+
+  // 趋势图
+  const trend = d.trend || {};
+  const vals = Object.values(trend);
+  const max = Math.max(...vals, 1);
+  const trendHTML = Object.entries(trend).map(([date, count]) => `
+    <div class="chart-bar-wrap">
+      <div class="chart-bar" style="height:${Math.max(count/max*100,3)}%" title="${date}: ${count}次"></div>
+      <div class="chart-label">${date.slice(5)}</div>
+    </div>`).join('');
+  document.getElementById('trendChart').innerHTML = trendHTML;
+
+  // 功能分布
+  const mc = d.mode_counts || {};
+  const total = (mc.hanzi||0) + (mc.chengyu||0) + (mc.writing||0) || 1;
+  document.getElementById('modeBars').innerHTML = [
+    { key:'hanzi', label:'汉字拆解', color:'var(--blue)' },
+    { key:'chengyu', label:'成语解读', color:'var(--gold)' },
+    { key:'writing', label:'文字化过渡', color:'var(--purple)' }
+  ].map(m => `
+    <div class="mode-bar-row">
+      <div class="mode-bar-info"><span>${m.label}</span><span style="color:var(--muted);font-family:var(--font-mono)">${mc[m.key]||0}次</span></div>
+      <div class="mode-bar-track"><div class="mode-bar-fill" style="width:${(mc[m.key]||0)/total*100}%;background:${m.color}"></div></div>
+    </div>`).join('');
+
+  // 热门汉字
+  const tc = d.top_chars || [];
+  const maxC = tc[0]?.[1] || 1;
+  document.getElementById('topChars').innerHTML = tc.length ? tc.map(([char,count],i) => `
+    <div class="char-row">
+      <div class="char-rank">${i+1}</div>
+      <div class="char-zh">${char||'?'}</div>
+      <div class="char-bar-wrap"><div class="char-bar-track"><div class="char-bar-fill" style="width:${count/maxC*100}%"></div></div></div>
+      <div class="char-count">${count}</div>
+    </div>`).join('') : '<div style="color:var(--muted);font-size:13px">暂无数据</div>';
+
+  // 业务指标
+  document.getElementById('bizMetrics').innerHTML = `
+    <div style="display:flex;justify-content:space-between;padding:12px;background:var(--surface2);border-radius:6px;">
+      <span style="font-size:13px;color:var(--muted)">总调用次数</span>
+      <span style="font-family:var(--font-mono);color:var(--text)">${d.total||0}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:12px;background:var(--surface2);border-radius:6px;">
+      <span style="font-size:13px;color:var(--muted)">付费用户</span>
+      <span style="font-family:var(--font-mono);color:var(--green)">${d.paid_users||0}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:12px;background:var(--surface2);border-radius:6px;">
+      <span style="font-size:13px;color:var(--muted)">免费次数限制</span>
+      <span style="font-family:var(--font-mono);color:var(--gold)">${d.settings?.free_daily_limit||3} 次/天</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding:12px;background:var(--surface2);border-radius:6px;">
+      <span style="font-size:13px;color:var(--muted)">维护模式</span>
+      <span style="font-family:var(--font-mono);color:${d.settings?.maintenance_mode==='true'?'var(--red)':'var(--green)'}">${d.settings?.maintenance_mode==='true'?'开启':'关闭'}</span>
+    </div>`;
+}
+
+async function loadUsers() {
+  allUsers = await api('users') || [];
+  renderUsers(allUsers);
+}
+
+function renderUsers(users) {
+  const tbody = document.getElementById('usersTable');
+  if (!users.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px">暂无用户</td></tr>'; return; }
+  tbody.innerHTML = users.map(u => `
+    <tr>
+      <td>${u.name||'—'}</td>
+      <td style="font-family:var(--font-mono);font-size:12px">${u.wechat||u.line_id||'—'}</td>
+      <td>${u.child_grade||'—'}</td>
+      <td>${u.school||'—'}</td>
+      <td><span class="badge badge-${u.status||'free'}">${{free:'免费',paid:'付费',vip:'VIP',pending:'待跟进'}[u.status]||u.status}</span></td>
+      <td style="font-family:var(--font-mono)">${u.usage_count||0}</td>
+      <td style="color:var(--muted);font-size:12px">${u.notes||'—'}</td>
+      <td>
+        <button class="action-btn" onclick="editUser(${u.id})">编辑</button>
+        <button class="action-btn del" onclick="deleteUser(${u.id})" style="margin-left:4px">删除</button>
+      </td>
+    </tr>`).join('');
+}
+
+function filterUsers() {
+  const q = document.getElementById('userSearch').value.toLowerCase();
+  const f = document.getElementById('userFilter').value;
+  renderUsers(allUsers.filter(u =>
+    (!q || (u.name||'').toLowerCase().includes(q) || (u.wechat||'').toLowerCase().includes(q)) &&
+    (!f || u.status === f)
+  ));
+}
+
+function showAddUser() {
+  document.getElementById('modalTitle').textContent = '添加用户';
+  document.getElementById('editUserId').value = '';
+  ['uName','uWechat','uLine','uEmail','uSchool','uNotes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('uGrade').value = '';
+  document.getElementById('uStatus').value = 'free';
+  document.getElementById('uUsage').value = 0;
+  document.getElementById('userModal').classList.add('show');
+}
+
+function editUser(id) {
+  const u = allUsers.find(u => u.id === id);
+  if (!u) return;
+  document.getElementById('modalTitle').textContent = '编辑用户';
+  document.getElementById('editUserId').value = id;
+  document.getElementById('uName').value = u.name||'';
+  document.getElementById('uWechat').value = u.wechat||'';
+  document.getElementById('uLine').value = u.line_id||'';
+  document.getElementById('uEmail').value = u.email||'';
+  document.getElementById('uGrade').value = u.child_grade||'';
+  document.getElementById('uSchool').value = u.school||'';
+  document.getElementById('uStatus').value = u.status||'free';
+  document.getElementById('uUsage').value = u.usage_count||0;
+  document.getElementById('uNotes').value = u.notes||'';
+  document.getElementById('userModal').classList.add('show');
+}
+
+async function saveUser() {
+  const id = document.getElementById('editUserId').value;
+  const data = {
+    name: document.getElementById('uName').value,
+    wechat: document.getElementById('uWechat').value,
+    line_id: document.getElementById('uLine').value,
+    email: document.getElementById('uEmail').value,
+    child_grade: document.getElementById('uGrade').value,
+    school: document.getElementById('uSchool').value,
+    status: document.getElementById('uStatus').value,
+    usage_count: parseInt(document.getElementById('uUsage').value)||0,
+    notes: document.getElementById('uNotes').value
+  };
+  if (id) data.id = parseInt(id);
+  await api('users', 'POST', data);
+  closeModal();
+  loadUsers();
+  showToast('用户已保存 ✓');
+}
+
+async function deleteUser(id) {
+  if (!confirm('确定删除此用户？')) return;
+  await api('users', 'DELETE', { id });
+  loadUsers();
+  showToast('已删除');
+}
+
+function closeModal() { document.getElementById('userModal').classList.remove('show'); }
+
+async function loadLogs() {
+  allLogs = await api('logs') || [];
+  renderLogs(allLogs);
+}
+
+function renderLogs(logs) {
+  document.getElementById('logsContainer').innerHTML = logs.map(l => `
+    <div class="log-row">
+      <div class="log-time">${l.created_at ? new Date(l.created_at).toLocaleString('zh-CN') : '—'}</div>
+      <div class="log-mode ${l.mode}">${{hanzi:'汉字',chengyu:'成语',writing:'写作'}[l.mode]||l.mode}</div>
+      <div class="log-input">${l.input||'—'}</div>
+      <div class="log-status ${l.success?'ok':'err'}">${l.success?'✓':'✗'}</div>
+    </div>`).join('') || '<div style="color:var(--muted);padding:20px">暂无日志</div>';
+}
+
+function filterLogs() {
+  const f = document.getElementById('logFilter').value;
+  renderLogs(f ? allLogs.filter(l => l.mode === f) : allLogs);
+}
+
+async function loadSettings() {
+  const settings = await api('settings') || [];
+  const map = Object.fromEntries(settings.map(s => [s.key, s.value]));
+  document.getElementById('settingsGrid').innerHTML = `
+    ${makeToggle('hanzi_enabled', '汉字拆解功能', '开关汉字拆解模块', map)}
+    ${makeToggle('chengyu_enabled', '成语解读功能', '开关成语解读模块', map)}
+    ${makeToggle('writing_enabled', '文字化过渡功能', '开关文字化过渡模块', map)}
+    ${makeToggle('maintenance_mode', '维护模式', '开启后用户看到维护页面', map)}
+    <div class="setting-item">
+      <div class="setting-info"><h4>免费每日次数</h4><p>每个用户每天免费使用次数</p></div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <input class="number-input" id="set-free_daily_limit" type="number" value="${map.free_daily_limit||3}" min="0" max="99">
+        <button class="action-btn" onclick="saveSetting('free_daily_limit', document.getElementById('set-free_daily_limit').value)">保存</button>
+      </div>
+    </div>
+    <div class="setting-item">
+      <div class="setting-info"><h4>AI 模型</h4><p>选择使用的 Claude 模型</p></div>
+      <select class="select-input" id="set-ai_model" onchange="saveSetting('ai_model', this.value)">
+        <option value="claude-haiku-4-5-20251001" ${map.ai_model==='claude-haiku-4-5-20251001'?'selected':''}>Haiku（省钱）</option>
+        <option value="claude-sonnet-4-6" ${map.ai_model==='claude-sonnet-4-6'?'selected':''}>Sonnet（高质）</option>
+      </select>
+    </div>`;
+}
+
+function makeToggle(key, label, desc, map) {
+  const on = map[key] === 'true';
+  return `<div class="setting-item">
+    <div class="setting-info"><h4>${label}</h4><p>${desc}</p></div>
+    <div class="toggle ${on?'on':''}" id="tog-${key}" onclick="toggleSetting('${key}')"></div>
+  </div>`;
+}
+
+async function toggleSetting(key) {
+  const el = document.getElementById('tog-' + key);
+  const newVal = !el.classList.contains('on');
+  el.classList.toggle('on');
+  await saveSetting(key, String(newVal));
+}
+
+async function saveSetting(key, value) {
+  await api('settings', 'POST', { key, value });
+  showToast('设置已保存 ✓');
+}
+
+// ══════════════════════════════════
+// 词库管理（真实 API）
+// ══════════════════════════════════
+let allChars = [];
+
+async function loadChars() {
+  document.getElementById('charTableBody').innerHTML =
+    '<tr><td colspan="7" class="loading-spinner">加载中...</td></tr>';
+  try {
+    allChars = await api('lexicon') || [];
+    renderChars(allChars);
+  } catch(e) {
+    document.getElementById('charTableBody').innerHTML =
+      '<tr><td colspan="7" style="text-align:center;color:var(--red);padding:32px">加载失败，请检查网络</td></tr>';
+  }
+}
+
+function renderChars(chars) {
+  document.getElementById('charCount').textContent = `共 ${chars.length} 个汉字`;
+  const tbody = document.getElementById('charTableBody');
+  if (!chars.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:40px">暂无汉字，点击"添加汉字"开始建库</td></tr>';
+    return;
+  }
+  tbody.innerHTML = chars.map(c => `
+    <tr>
+      <td>
+        <span style="font-size:32px;color:var(--red);font-weight:700;line-height:1">${c.char}</span>
+      </td>
+      <td style="font-family:var(--font-mono);font-size:14px;color:var(--gold)">${c.pinyin}</td>
+      <td>
+        <span class="badge" style="background:${levelColor(c.level,0.15)};color:${levelColor(c.level,1)}">${c.level}</span>
+      </td>
+      <td style="font-size:13px;color:var(--muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.meaning||'—'}</td>
+      <td style="font-size:13px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.parts||'—'}</td>
+      <td style="text-align:center">
+        ${c.audio_url
+          ? `<span style="color:var(--green);font-size:18px;cursor:pointer" title="播放语音" onclick="playAudio('${c.audio_url}')">🔊</span>`
+          : `<span style="color:var(--border);font-size:18px" title="暂无语音">✕</span>`}
+      </td>
+      <td>
+        <button class="action-btn" onclick="editChar(${c.id})">编辑</button>
+        <button class="action-btn del" onclick="deleteChar(${c.id})" style="margin-left:4px">删除</button>
+      </td>
+    </tr>`).join('');
+}
+
+function levelColor(level, alpha) {
+  const colors = { R1:'76,175,125', R2:'74,158,224', R3:'201,168,76', R4:'224,90,68', R5:'155,122,224' };
+  return `rgba(${colors[level]||'120,120,120'},${alpha})`;
+}
+
+function filterChars() {
+  const q = document.getElementById('charSearch').value.toLowerCase();
+  const f = document.getElementById('charFilter').value;
+  renderChars(allChars.filter(c =>
+    (!q || c.char.includes(q) || c.pinyin.toLowerCase().includes(q) || (c.meaning||'').includes(q)) &&
+    (!f || c.level === f)
+  ));
+}
+
+function showAddChar() {
+  document.getElementById('charModalTitle').textContent = '添加汉字';
+  document.getElementById('editCharId').value = '';
+  document.getElementById('cChar').value = '';
+  document.getElementById('cPinyin').value = '';
+  document.getElementById('cLevel').value = 'R1';
+  document.getElementById('cMeaning').value = '';
+  document.getElementById('cParts').value = '';
+  document.getElementById('cStory').value = '';
+  document.getElementById('cAudio').value = '';
+  document.getElementById('audioPreview').style.display = 'none';
+  document.getElementById('charModal').classList.add('show');
+  setTimeout(() => document.getElementById('cChar').focus(), 100);
+}
+
+function editChar(id) {
+  const c = allChars.find(c => c.id === id);
+  if (!c) return;
+  document.getElementById('charModalTitle').textContent = `编辑汉字「${c.char}」`;
+  document.getElementById('editCharId').value = id;
+  document.getElementById('cChar').value = c.char;
+  document.getElementById('cPinyin').value = c.pinyin;
+  document.getElementById('cLevel').value = c.level;
+  document.getElementById('cMeaning').value = c.meaning||'';
+  document.getElementById('cParts').value = c.parts||'';
+  document.getElementById('cStory').value = c.story||'';
+  document.getElementById('cAudio').value = c.audio_url||'';
+  document.getElementById('audioPreview').style.display = 'none';
+  document.getElementById('charModal').classList.add('show');
+}
+
+async function saveChar() {
+  const id = document.getElementById('editCharId').value;
+  const data = {
+    char: document.getElementById('cChar').value.trim(),
+    pinyin: document.getElementById('cPinyin').value.trim(),
+    level: document.getElementById('cLevel').value,
+    meaning: document.getElementById('cMeaning').value.trim(),
+    parts: document.getElementById('cParts').value.trim(),
+    story: document.getElementById('cStory').value.trim(),
+    audio_url: document.getElementById('cAudio').value.trim()
+  };
+  if (!data.char) { showToast('请输入汉字'); return; }
+  try {
+    if (id) {
+      await api('lexicon', 'PUT', { id: parseInt(id), ...data });
+      showToast(`「${data.char}」已更新 ✓`);
+    } else {
+      await api('lexicon', 'POST', data);
+      showToast(`「${data.char}」已添加 ✓`);
+    }
+    closeCharModal();
+    await loadChars();
+  } catch(e) {
+    showToast('保存失败：' + e.message);
+  }
+}
+
+async function deleteChar(id) {
+  const c = allChars.find(c => c.id === id);
+  if (!confirm(`确定删除「${c?.char}」？`)) return;
+  try {
+    await api('lexicon', 'DELETE', { id });
+    showToast('已删除');
+    await loadChars();
+  } catch(e) {
+    showToast('删除失败');
+  }
+}
+
+function closeCharModal() {
+  document.getElementById('charModal').classList.remove('show');
+}
+
+function previewAudio() {
+  const url = document.getElementById('cAudio').value.trim();
+  if (!url) { showToast('请先输入音频 URL'); return; }
+  const audio = document.getElementById('audioPreview');
+  audio.src = url;
+  audio.style.display = 'block';
+  audio.play();
+}
+
+function playAudio(url) {
+  const a = new Audio(url);
+  a.play().catch(() => showToast('音频播放失败，请检查链接'));
+}
+
+async function loadContent() { loadChars(); }
+async function saveContent() {}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 2500);
+}
+</script>
+
+</body>
+</html>
