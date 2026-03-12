@@ -6,8 +6,5 @@
         { "key": "X-Frame-Options", "value": "ALLOWALL" }
       ]
     }
-  ],
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/public/api/$1" }
   ]
 }
