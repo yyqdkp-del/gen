@@ -326,7 +326,7 @@ function setCY(t) { document.getElementById('chengyuInput').value = t; }
 function setWriting(t) { document.getElementById('writingInput').value = t; }
 
 async function callAPI(body) {
-  const res = await fetch('/api/generate', {
+  const res = await fetch('https://gen-fawn.vercel.app/api/generate', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify(body)
