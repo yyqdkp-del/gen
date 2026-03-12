@@ -744,17 +744,33 @@
     // Main: fetch report from API
     // ─────────────────────────────────────────
     async function main() {
-      const p        = new URLSearchParams(window.location.search);
-      const fallback = p.get('fallback');
-      const answers  = parseAnswersFromURL();
+      const p          = new URLSearchParams(window.location.search);
+      const fallback   = p.get('fallback');
+      const responseId = p.get('rid');  // Tally Webhook模式
+      const answers    = parseAnswersFromURL();
 
-      // 判断是否有实际答案（非全空）
+      // 判断是否有实际答案（非全空，且不是未替换的Tally变量@开头）
       const hasAnswers = Object.entries(answers)
         .filter(([k]) => k !== 'source')
-        .some(([, v]) => v !== '');
+        .some(([, v]) => v !== '' && !v.startsWith('@'));
 
-      // 无答案时直接降级
-      if (!hasAnswers && !fallback) {
+      // ── 模式1：Webhook模式，用responseId读缓存报告 ──
+      if (responseId) {
+        runLoadingAnimation(async () => {
+          try {
+            const res = await fetch(`/api/tally-webhook?id=${responseId}`);
+            const data = await res.json();
+            renderReport(data.level ? data : (data.fallback || FALLBACK));
+          } catch (err) {
+            console.error('Webhook fetch error:', err);
+            renderReport(FALLBACK);
+          }
+        });
+        return;
+      }
+
+      // ── 模式2：直接参数模式 ──
+      if (!hasAnswers) {
         runLoadingAnimation(() => renderReport(FALLBACK));
         return;
       }
