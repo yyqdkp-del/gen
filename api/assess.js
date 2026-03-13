@@ -78,7 +78,7 @@ module.exports = async function(req, res) {
   try {
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     const msg = await client.messages.create({
-      model: 'claude-3-5-sonnet-latest', // 自动指向支持的最新版，最不容易报错
+     model: 'claude-3-sonnet-20240229', // 经典稳定版
       max_tokens: 1000,
       system: SYSTEM_PROMPT,
       messages: [{ 
