@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>根·中文 · 读写能力测评</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy:   #1A3C5E;
+      --orange: #E8892A;
+      --bg:     #F5F9FC;
+      --white:  #FFFFFF;
+      --text:   #1A2B3C;
+      --muted:  #6B8BAA;
+      --border: #D0DFF0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      font-family: 'Noto Sans SC', sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-bottom: 60px;
+    }
+
+```
+/* TOP BAR */
+.topbar {
+  width: 100%;
+  background: var(--navy);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.topbar-logo {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 2px;
+}
+.topbar-sub {
+  font-size: 12px;
+  color: rgba(255,255,255,0.6);
+  margin-left: auto;
+}
+
+/* CARD */
+.card {
+  width: 100%;
+  max-width: 560px;
+  background: var(--white);
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(26,60,94,0.10);
+  margin: 32px 16px 0;
+  padding: 32px 28px;
+}
+
+/* COVER */
+.cover {
+  width: 100%;
+  max-width: 560px;
+  margin: 0 16px;
+}
+.cover img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 0 0 16px 16px;
+}
+
+/* HERO */
+.hero {
+  text-align: center;
+  padding: 0 0 24px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 28px;
+}
+.hero-title {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--navy);
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+.hero-sub {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.badge {
+  display: inline-block;
+  background: rgba(232,137,42,0.12);
+  color: var(--orange);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+}
+
+/* PROGRESS */
+.progress-wrap {
+  margin-bottom: 28px;
+}
+.progress-label {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+}
+.progress-bar {
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--orange);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+/* QUESTION */
+.question-block { display: none; }
+.question-block.active { display: block; }
+
+.q-label {
+  font-size: 12px;
+  color: var(--orange);
+  font-weight: 500;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+.q-text {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+.q-hint {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 20px;
+  line-height: 1.6;
+  background: rgba(26,60,94,0.04);
+  padding: 10px 14px;
+  border-radius: 8px;
+}
+
+/* OPTIONS */
+.options { display: flex; flex-direction: column; gap: 10px; }
+.option {
+  padding: 14px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text);
+  background: var(--white);
+}
+.option:hover { border-color: var(--orange); background: rgba(232,137,42,0.04); }
+.option.selected { border-color: var(--navy); background: rgba(26,60,94,0.06); font-weight: 500; }
+.option-key {
+  width: 26px; height: 26px;
+  border-radius: 6px;
+  background: var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+  color: var(--navy);
+  flex-shrink: 0;
+}
+.option.selected .option-key { background: var(--navy); color: #fff; }
+
+/* TEXT INPUT */
+.text-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 15px;
+  font-family: 'Noto Sans SC', sans-serif;
+  color: var(--text);
+  outline: none;
+  transition: border 0.2s;
+}
+.text-input:focus { border-color: var(--navy); }
+
+/* BUTTONS */
+.btn-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+}
+.btn {
+  flex: 1;
+  padding: 14px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+  font-family: 'Noto Sans SC', sans-serif;
+}
+.btn-prev {
+  background: var(--bg);
+  color: var(--muted);
+  flex: 0 0 80px;
+}
+.btn-next {
+  background: var(--navy);
+  color: #fff;
+}
+.btn-next:hover { background: #2E6B9E; }
+.btn-next:disabled { background: var(--border); cursor: not-allowed; }
+.btn-submit {
+  background: var(--orange);
+  color: #fff;
+  width: 100%;
+  margin-top: 24px;
+  padding: 16px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  font-family: 'Noto Sans SC', sans-serif;
+}
+.btn-submit:hover { background: #d67a1e; }
+
+/* LOADING */
+#loading-screen {
+  display: none;
+  text-align: center;
+  padding: 40px 0;
+}
+.loading-steps { list-style: none; text-align: left; margin: 24px 0; }
+.loading-steps li {
+  padding: 10px 0;
+  font-size: 14px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.loading-steps li.done { color: var(--navy); font-weight: 500; }
+.loading-steps li.active { color: var(--orange); font-weight: 500; }
+.step-icon { font-size: 18px; width: 24px; text-align: center; }
+.spinner {
+  width: 48px; height: 48px;
+  border: 4px solid var(--border);
+  border-top-color: var(--navy);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-title {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 8px;
+}
+.loading-sub { font-size: 13px; color: var(--muted); }
+
+/* REPORT */
+#report-screen { display: none; }
+.report-header {
+  text-align: center;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+.level-badge {
+  display: inline-block;
+  background: var(--navy);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 18px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+  letter-spacing: 1px;
+}
+.level-title {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--navy);
+  margin-bottom: 8px;
+}
+.level-sub { font-size: 14px; color: var(--muted); }
+
+.report-section {
+  margin-bottom: 20px;
+  padding: 18px;
+  border-radius: 12px;
+  background: var(--bg);
+}
+.report-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--orange);
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+.report-section-text {
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--text);
+}
+.report-local {
+  background: rgba(26,60,94,0.06);
+  border-left: 3px solid var(--navy);
+  padding: 14px 16px;
+  border-radius: 0 10px 10px 0;
+  font-size: 14px;
+  font-style: italic;
+  color: var(--navy);
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+.cta-box {
+  background: var(--navy);
+  color: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  margin-top: 24px;
+}
+.cta-text {
+  font-size: 15px;
+  line-height: 1.7;
+  margin-bottom: 16px;
+  opacity: 0.9;
+}
+.cta-btn {
+  display: inline-block;
+  background: var(--orange);
+  color: #fff;
+  padding: 12px 28px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  border: none;
+  font-family: 'Noto Sans SC', sans-serif;
+}
+.share-btn {
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px;
+  background: var(--bg);
+  color: var(--navy);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: 'Noto Sans SC', sans-serif;
+}
+
+/* FOOTER */
+.footer {
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+```
+
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="topbar-logo">根·中文</span>
+  <span class="topbar-sub">清迈陪读家庭专属</span>
+</div>
+
+<div class="card" id="quiz-screen">
+  <div class="hero" style="background-image:url('/IMG_0554.png');background-size:cover;background-position:center 40%;border-radius:12px;padding:48px 24px;margin:-32px -28px 28px;position:relative;overflow:hidden;">
+    <div style="position:absolute;inset:0;background:linear-gradient(to bottom, rgba(26,60,94,0.55), rgba(26,60,94,0.75));border-radius:12px;"></div>
+    <div style="position:relative;z-index:1;text-align:center;">
+      <div class="badge" style="background:rgba(232,137,42,0.9);color:#fff;">🌿 5分钟深度测评</div>
+      <div class="hero-title" style="color:#fff;">孩子读写能力测评</div>
+      <div class="hero-sub" style="color:rgba(255,255,255,0.85);">获取专为清迈陪读家庭定制的<br>R级别报告与行动指南</div>
+    </div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span id="progress-text">第 1 题，共 11 题</span>
+      <span id="progress-pct">9%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:9%"></div></div>
+  </div>
+
+  <!-- Q1 -->
+
+  <div class="question-block active" data-q="1">
+    <div class="q-label">Q1 · 基本信息</div>
+    <div class="q-text">孩子现在几年级？</div>
+    <div class="options">
+      <div class="option" data-val="K1-K2"><span class="option-key">A</span>K1-K2</div>
+      <div class="option" data-val="K3"><span class="option-key">B</span>K3</div>
+      <div class="option" data-val="G1"><span class="option-key">C</span>G1</div>
+      <div class="option" data-val="G2"><span class="option-key">D</span>G2</div>
+      <div class="option" data-val="G3"><span class="option-key">E</span>G3</div>
+      <div class="option" data-val="G4"><span class="option-key">F</span>G4</div>
+      <div class="option" data-val="G5"><span class="option-key">G</span>G5</div>
+      <div class="option" data-val="G6+"><span class="option-key">H</span>G6及以上</div>
+    </div>
+  </div>
+
+  <!-- Q2 -->
+
+  <div class="question-block" data-q="2">
+    <div class="q-label">Q2 · 基本信息</div>
+    <div class="q-text">孩子在哪所学校就读？</div>
+    <input type="text" class="text-input" placeholder="输入学校名称，如 BCIS、Prem..." />
+  </div>
+
+  <!-- Q3 -->
+
+  <div class="question-block" data-q="3">
+    <div class="q-label">Q3 · 家庭语言</div>
+    <div class="q-text">家里平时用什么语言跟孩子说话？</div>
+    <div class="options">
+      <div class="option" data-val="主要说中文"><span class="option-key">A</span>主要说中文</div>
+      <div class="option" data-val="中英混用"><span class="option-key">B</span>中英混用</div>
+      <div class="option" data-val="主要说英文"><span class="option-key">C</span>主要说英文</div>
+      <div class="option" data-val="三语都有"><span class="option-key">D</span>三语都有（中/英/泰）</div>
+    </div>
+  </div>
+
+  <!-- Q4 -->
+
+  <div class="question-block" data-q="4">
+    <div class="q-label">Q4 · 阅读能力</div>
+    <div class="q-text">孩子能独立读完一本中文绘本吗？</div>
+    <div class="options">
+      <div class="option" data-val="能，完全没问题"><span class="option-key">A</span>能，完全没问题</div>
+      <div class="option" data-val="能读，但有些字要问我"><span class="option-key">B</span>能读，但有些字要问我</div>
+      <div class="option" data-val="只能读几个字，大部分靠猜图"><span class="option-key">C</span>只能读几个字，大部分靠猜图</div>
+      <div class="option" data-val="基本不会读"><span class="option-key">D</span>基本不会读</div>
+    </div>
+  </div>
+
+  <!-- Q5 -->
+
+  <div class="question-block" data-q="5">
+    <div class="q-label">Q5 · 理解能力</div>
+    <div class="q-text">给孩子看一段中文文字（不带图），他能大概理解意思吗？</div>
+    <div class="options">
+      <div class="option" data-val="能理解80%以上"><span class="option-key">A</span>能理解80%以上</div>
+      <div class="option" data-val="能理解一半左右"><span class="option-key">B</span>能理解一半左右</div>
+      <div class="option" data-val="只能认出几个单字"><span class="option-key">C</span>只能认出几个单字</div>
+      <div class="option" data-val="完全看不懂"><span class="option-key">D</span>完全看不懂</div>
+    </div>
+  </div>
+
+  <!-- Q6 -->
+
+  <div class="question-block" data-q="6">
+    <div class="q-label">Q6 · 认字数量</div>
+    <div class="q-text">孩子大概认识多少个汉字？</div>
+    <div class="options">
+      <div class="option" data-val="50个以下"><span class="option-key">A</span>50个以下</div>
+      <div class="option" data-val="50-200个"><span class="option-key">B</span>50－200个</div>
+      <div class="option" data-val="200-500个"><span class="option-key">C</span>200－500个</div>
+      <div class="option" data-val="500个以上"><span class="option-key">D</span>500个以上</div>
+    </div>
+  </div>
+
+  <!-- Q7 -->
+
+  <div class="question-block" data-q="7">
+    <div class="q-label">Q7 · 拼音依赖</div>
+    <div class="q-text">孩子读中文时，拼音对他来说：</div>
+    <div class="options">
+      <div class="option" data-val="完全不需要，直接认字"><span class="option-key">A</span>完全不需要，直接认字</div>
+      <div class="option" data-val="有拼音会好很多"><span class="option-key">B</span>有拼音会好很多</div>
+      <div class="option" data-val="有拼音也还是很吃力"><span class="option-key">C</span>有拼音也还是很吃力</div>
+      <div class="option" data-val="还不会拼音"><span class="option-key">D</span>还不会拼音</div>
+    </div>
+  </div>
+
+  <!-- Q7.5 影子题 -->
+
+  <div class="question-block" data-q="8">
+    <div class="q-label">Q7.5 · 字理意识</div>
+    <img src="/IMG_0561.png" alt="休字图解" style="width:100%;border-radius:10px;margin-bottom:14px;" />
+    <div class="q-text">孩子看到「休」这个字，他的第一反应是？</div>
+    <div class="options">
+      <div class="option" data-val="like_picture"><span class="option-key">A</span>觉得像一幅画——一个人靠在树旁边休息</div>
+      <div class="option" data-val="just_symbols"><span class="option-key">B</span>觉得就是两个符号拼在一起，没特别感觉</div>
+      <div class="option" data-val="never_thought"><span class="option-key">C</span>从来没想过这个问题</div>
+    </div>
+  </div>
+
+  <!-- Q8 -->
+
+  <div class="question-block" data-q="9">
+    <div class="q-label">Q8 · 书写能力</div>
+    <div class="q-text">孩子能自己写出一句完整的中文句子吗？</div>
+    <div class="options">
+      <div class="option" data-val="能，而且写得挺好"><span class="option-key">A</span>能，而且写得挺好</div>
+      <div class="option" data-val="能写，但错别字很多"><span class="option-key">B</span>能写，但错别字很多</div>
+      <div class="option" data-val="只能写几个单字"><span class="option-key">C</span>只能写几个单字</div>
+      <div class="option" data-val="基本不会写"><span class="option-key">D</span>基本不会写</div>
+    </div>
+  </div>
+
+  <!-- Q9 阅读意愿 -->
+
+  <div class="question-block" data-q="10">
+    <div class="q-label">Q9 · 阅读意愿</div>
+    <div class="q-text">叫孩子读一本中文书，他的状态通常是？</div>
+    <div class="options">
+      <div class="option" data-val="愿意读，读得挺顺"><span class="option-key">A</span>愿意读，读得挺顺</div>
+      <div class="option" data-val="reads_but_blocked"><span class="option-key">B</span>愿意读，但写作业时完全词穷、写不出来</div>
+      <div class="option" data-val="tired_resist"><span class="option-key">C</span>能读，但觉得很累，慢慢开始抗拒</div>
+      <div class="option" data-val="强烈抗拒，每次都是一场战争"><span class="option-key">D</span>强烈抗拒，每次都是一场战争</div>
+    </div>
+  </div>
+
+  <!-- Q10 -->
+
+  <div class="question-block" data-q="11">
+    <div class="q-label">Q10 · 中英对比</div>
+    <div class="q-text">孩子的中文和英文读写能力相比：</div>
+    <div class="options">
+      <div class="option" data-val="中文更强"><span class="option-key">A</span>中文更强</div>
+      <div class="option" data-val="差不多"><span class="option-key">B</span>差不多</div>
+      <div class="option" data-val="英文明显更强"><span class="option-key">C</span>英文明显更强</div>
+      <div class="option" data-val="英文强太多了，中文完全跟不上"><span class="option-key">D</span>英文强太多了，中文完全跟不上</div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-prev" id="btn-prev" onclick="prevQ()" style="display:none">← 上一题</button>
+    <button class="btn btn-next" id="btn-next" onclick="nextQ()" disabled>下一题 →</button>
+  </div>
+
+  <div class="footer">根·中文 · 专为清迈陪读家庭设计 🌿</div>
+</div>
+
+<!-- LOADING -->
+
+<div class="card" id="loading-screen">
+  <div class="spinner"></div>
+  <div class="loading-title">正在分析孩子的读写水平...</div>
+  <div class="loading-sub">AI顾问正在生成专属报告</div>
+  <ul class="loading-steps">
+    <li id="step1"><span class="step-icon">📊</span>解析问卷答案</li>
+    <li id="step2"><span class="step-icon">🧠</span>判定R级别与卡点</li>
+    <li id="step3"><span class="step-icon">🌿</span>生成清迈本地化建议</li>
+    <li id="step4"><span class="step-icon">📋</span>生成行动指南</li>
+  </ul>
+</div>
+
+<!-- REPORT -->
+
+<div class="card" id="report-screen">
+  <div class="report-header">
+    <div class="level-badge" id="r-badge">R3 · 句子理解期</div>
+    <div class="level-title" id="r-title">孩子的专属报告</div>
+    <div class="level-sub" id="r-sub">根·中文 AI 顾问生成</div>
+  </div>
+
+  <div class="report-section">
+    <div class="report-section-title">📍 现状洞察</div>
+    <div class="report-section-text" id="r-insight"></div>
+  </div>
+
+  <div class="report-section">
+    <div class="report-section-title">🔍 核心卡点</div>
+    <div class="report-section-text" id="r-blockpoint"></div>
+  </div>
+
+  <div class="report-section">
+    <div class="report-section-title">✅ 本周行动</div>
+    <div class="report-section-text" id="r-action"></div>
+  </div>
+
+  <div class="report-local" id="r-local"></div>
+
+  <div class="report-section">
+    <div class="report-section-title">🌟 功能推荐</div>
+    <div class="report-section-text" id="r-feature"></div>
+  </div>
+
+  <div class="cta-box">
+    <div class="cta-text" id="r-cta"></div>
+    <a href="https://yyqdkp-del.github.io/Genchinese/" class="cta-btn">免费开始体验 →</a>
+  </div>
+
+<button class="share-btn" onclick="shareReport()">📤 分享给其他妈妈</button>
+
+  <div class="footer">根·中文 · 专为清迈陪读家庭设计 🌿</div>
+</div>
+
+<script>
+  const TOTAL = 11;
+  let current = 1;
+  const answers = {};
+
+  function updateProgress() {
+    const pct = Math.round((current / TOTAL) * 100);
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-text').textContent = `第 ${current} 题，共 ${TOTAL} 题`;
+    document.getElementById('progress-pct').textContent = pct + '%';
+    document.getElementById('btn-prev').style.display = current > 1 ? 'block' : 'none';
+    const isLast = current === TOTAL;
+    const btn = document.getElementById('btn-next');
+    btn.textContent = isLast ? '生成我的报告 🌿' : '下一题 →';
+    btn.onclick = isLast ? submitQuiz : nextQ;
+  }
+
+  function getCurrentBlock() {
+    return document.querySelector(`.question-block[data-q="${current}"]`);
+  }
+
+  function getCurrentAnswer() {
+    const block = getCurrentBlock();
+    const selected = block.querySelector('.option.selected');
+    if (selected) return selected.dataset.val;
+    const input = block.querySelector('.text-input');
+    if (input) return input.value.trim();
+    return null;
+  }
+
+  function checkAnswer() {
+    const val = getCurrentAnswer();
+    document.getElementById('btn-next').disabled = !val;
+  }
+
+  // Option click
+  document.querySelectorAll('.option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      const block = opt.closest('.question-block');
+      block.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+      checkAnswer();
+      // Auto advance after short delay
+      setTimeout(() => {
+        if (current < TOTAL) nextQ();
+        else submitQuiz();
+      }, 300);
+    });
+  });
+
+  // Text input
+  document.querySelectorAll('.text-input').forEach(input => {
+    input.addEventListener('input', checkAnswer);
+  });
+
+  function nextQ() {
+    const val = getCurrentAnswer();
+    if (!val) return;
+    answers[`q${current}`] = val;
+    current++;
+    document.querySelectorAll('.question-block').forEach(b => b.classList.remove('active'));
+    getCurrentBlock().classList.add('active');
+    updateProgress();
+    checkAnswer();
+    window.scrollTo(0, 0);
+  }
+
+  function prevQ() {
+    if (current <= 1) return;
+    current--;
+    document.querySelectorAll('.question-block').forEach(b => b.classList.remove('active'));
+    getCurrentBlock().classList.add('active');
+    updateProgress();
+    checkAnswer();
+    window.scrollTo(0, 0);
+  }
+
+  updateProgress();
+  checkAnswer();
+
+  // ── SUBMIT & GENERATE REPORT ──
+  async function submitQuiz() {
+    const val = getCurrentAnswer();
+    if (!val) return;
+    answers[`q${current}`] = val;
+
+    document.getElementById('quiz-screen').style.display = 'none';
+    document.getElementById('loading-screen').style.display = 'block';
+    window.scrollTo(0, 0);
+
+    // Animate loading steps
+    const steps = ['step1','step2','step3','step4'];
+    for (let i = 0; i < steps.length; i++) {
+      await new Promise(r => setTimeout(r, 600));
+      if (i > 0) document.getElementById(steps[i-1]).className = 'done';
+      document.getElementById(steps[i]).className = 'active';
+    }
+
+    // Call Claude API via assess endpoint
+    try {
+      const res = await fetch('/api/assess', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ answers })
+      });
+      const data = await res.json();
+      const report = data.level ? data : FALLBACK;
+      await new Promise(r => setTimeout(r, 400));
+      document.getElementById(steps[3]).className = 'done';
+      await new Promise(r => setTimeout(r, 300));
+      showReport(report);
+    } catch(e) {
+      console.error(e);
+      showReport(FALLBACK);
+    }
+  }
+
+  const FALLBACK = {
+    level: 'R3',
+    level_desc: '句子理解期',
+    insight: '孩子正处于中文学习的关键突破期，已经有了基础，只差一把钥匙。',
+    blockpoint: '汉字对孩子来说还是符号，还没变成有意义的画面和故事。',
+    action: '今晚用「休」字和孩子玩一个游戏：让他猜这个字在说什么故事。',
+    local_line: '清迈的孩子每天看见榕树，「休」就是人靠着树——字就是画。',
+    feature_rec: '从汉字拆解器开始，每天一个字，让汉字从符号变成故事。',
+    cta: '领取你的专属学习路线图，开启第一个汉字故事 🌿'
+  };
+
+  function showReport(r) {
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('report-screen').style.display = 'block';
+    document.getElementById('r-badge').textContent = `${r.level} · ${r.level_desc}`;
+    document.getElementById('r-title').textContent = `${r.level_desc}`;
+    document.getElementById('r-sub').textContent = '根·中文 AI 顾问生成 · ' + new Date().toLocaleDateString('zh-CN');
+    document.getElementById('r-insight').textContent = r.insight;
+    document.getElementById('r-blockpoint').textContent = r.blockpoint;
+    document.getElementById('r-action').textContent = r.action;
+    document.getElementById('r-local').textContent = '🌿 ' + r.local_line;
+    document.getElementById('r-feature').textContent = r.feature_rec;
+    document.getElementById('r-cta').textContent = r.cta;
+    window.scrollTo(0, 0);
+  }
+
+  function shareReport() {
+    if (navigator.share) {
+      navigator.share({
+        title: '根·中文 · 孩子读写能力测评',
+        text: '5分钟深度测评，获取专为清迈陪读家庭定制的R级别报告',
+        url: 'https://yyqdkp-del.github.io/Genchinese/'
+      });
+    } else {
+      navigator.clipboard?.writeText('https://yyqdkp-del.github.io/Genchinese/').then(() => {
+        alert('链接已复制，快发给其他妈妈吧 🌿');
+      });
+    }
+  }
+</script>
+
+</body>
+</html>
