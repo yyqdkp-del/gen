@@ -1,6 +1,9 @@
 {
-  "type": "module",
+  "name": "gen-chinese-assess",
+  "version": "1.0.0",
+  "description": "根·中文 API",
+  "main": "api/assess.js",
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.20.0"
+    "@anthropic-ai/sdk": "^0.33.1"
   }
 }
