@@ -156,7 +156,7 @@ cta: “最好的干预时机就是现在。免费领取第一周任务卡，先
 // ─────────────────────────────────────────────
 // 主处理函数
 // ─────────────────────────────────────────────
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
 // CORS
 res.setHeader(‘Access-Control-Allow-Origin’, ‘*’);
 res.setHeader(‘Access-Control-Allow-Methods’, ‘POST, OPTIONS’);
